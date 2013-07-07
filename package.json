@@ -1,7 +1,7 @@
 {
   "name": "substance-operator",
   "description": "Provides bricks for a Substance building.",
-  "keywords": ["substance"],
+  "keywords": ["substance", "operational transformation"],
   "author": "Oliver Buchtala <oliver.buchtala@gmail.com>",
   "version": "0.1.0",
   "repository": {
