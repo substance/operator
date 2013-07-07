@@ -6,7 +6,8 @@
 var _,
     errors,
     util,
-    Compound;
+    Compound,
+    Operation;
 
 if (typeof exports !== 'undefined') {
   _ = require('underscore');
@@ -141,6 +142,7 @@ TextOperation.__prototype__ = function() {
   };
 
 };
+TextOperation.__prototype__.prototype = Operation.prototype;
 TextOperation.prototype = new TextOperation.__prototype__();
 
 var hasConflict = function(a, b) {
@@ -476,8 +478,7 @@ TextOperation.DELETE = DEL;
 if (typeof exports !== 'undefined') {
   module.exports = TextOperation;
 } else {
-  Chronicle.ot = Chronicle.ot || {};
-  Chronicle.ot.TextOperation = TextOperation;
+  root.Substance.Operator.TextOperation = TextOperation;
 }
 
 })(this);

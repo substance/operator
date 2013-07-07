@@ -4,14 +4,17 @@
 // ========
 
 var _,
-   util;
+   util,
+   Operation;
 
 if (typeof exports !== 'undefined') {
   _    = require('underscore');
-  util   = require('../util/util');
+  util   = require('substance-util');
+  Operation = require('./operation');
 } else {
   _ = root._;
   util = root.Substance.util;
+  Operation = root.Substance.Operator.Operation;
 }
 
 var COMPOUND = "compound";
@@ -59,6 +62,7 @@ Compound.__prototype__ = function() {
   };
 
 };
+Compound.__prototype__.prototype = Operation.prototype;
 Compound.prototype = new Compound.__prototype__();
 
 Compound.TYPE = COMPOUND;

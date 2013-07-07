@@ -210,6 +210,7 @@ ObjectOperation.__prototype__ = function() {
   };
 
 };
+ObjectOperation.__prototype__.prototype = Operation.prototype;
 ObjectOperation.prototype = new ObjectOperation.__prototype__();
 
 ObjectOperation.Object = function(obj) {

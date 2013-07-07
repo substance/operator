@@ -5,9 +5,17 @@
 
 var _,
     errors,
-    util,
-    Chronicle,
-    Compound;
+    util;
+
+if (typeof exports !== 'undefined') {
+  _ = require('underscore');
+  util   = require('substance-util');
+  errors   = require('substance-util/errors');
+} else {
+  _ = root._;
+  util = root.Substance.util;
+  errors = root.Substance.errors;
+}
 
 errors.define("OperationError", -1);
 errors.define("Conflict", -1);
@@ -51,10 +59,10 @@ Operation.conflict = function(a, b) {
 // ========
 
 if (typeof exports !== 'undefined') {
-  module.exports = TextOperation;
+  module.exports = Operation;
 } else {
-  Chronicle.ot = Chronicle.ot || {};
-  Chronicle.ot.TextOperation = TextOperation;
+  root.Substance.Operator = {};
+  root.Substance.Operator.Operation = Operation;
 }
 
 

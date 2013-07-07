@@ -204,6 +204,7 @@ ArrayOperation.__prototype__ = function() {
   };
 
 };
+ArrayOperation.__prototype__.prototype = Operation.prototype;
 ArrayOperation.prototype = new ArrayOperation.__prototype__();
 
 var _NOP = 0;
