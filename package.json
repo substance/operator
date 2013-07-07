@@ -1,0 +1,17 @@
+{
+  "name": "substance-operator",
+  "description": "Provides bricks for a Substance building.",
+  "keywords": ["substance"],
+  "author": "Oliver Buchtala <oliver.buchtala@gmail.com>",
+  "version": "0.1.0",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/substance/operator.git"
+  },
+  "engines": {
+      "node": ">=0.6.0"
+  },
+  "dependencies": {
+    "underscore": "1.4.x"
+  }
+}
