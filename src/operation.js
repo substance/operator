@@ -40,10 +40,6 @@ Operation.Prototype = function() {
     throw new Error("Not implemented.");
   };
 
-  this.transform = function(other) {
-    throw new Error("Not implemented.");
-  };
-
 };
 
 Operation.prototype = new Operation.Prototype();
