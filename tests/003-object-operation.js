@@ -11,13 +11,13 @@ if (typeof exports !== 'undefined') {
   errors = require('substance-util/errors');
   assert   = require('substance-test/assert');
   Operator = require('..');
-  registerTest = require('substance-test').registerTest;
+  registerTest = require('substance-test').Test.registerTest;
 } else {
   util = root.Substance.util;
   errors = root.Substance.errors;
   assert = root.Substance.assert;
   Operator = root.Substance.Operator;
-  registerTest = root.Substance.registerTest;
+  registerTest = root.Substance.Test.registerTest;
 }
 
 var ObjectOperation = Operator.ObjectOperation;

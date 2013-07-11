@@ -9,12 +9,12 @@ if (typeof exports !== 'undefined') {
   assert   = require('substance-test/assert');
   errors   = require('substance-util/errors');
   TextOperation = require("..").TextOperation;
-  registerTest = require('substance-test').registerTest;
+  registerTest = require('substance-test').Test.registerTest;
 } else {
   assert = root.Substance.assert;
   errors   = root.Substance.errors;
   TextOperation = root.Substance.Operator.TextOperation;
-  registerTest = root.Substance.registerTest;
+  registerTest = root.Substance.Test.registerTest;
 }
 
 function testTransform(a, b, input, expected) {

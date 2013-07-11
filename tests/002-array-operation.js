@@ -7,11 +7,11 @@ var assert,
 if (typeof exports !== 'undefined') {
   assert   = require('substance-test/assert');
   Operator = require('..');
-  registerTest = require('substance-test').registerTest;
+  registerTest = require('substance-test').Test.registerTest;
 } else {
   assert = root.Substance.assert;
   Operator = root.Substance.Operator;
-  registerTest = root.Substance.registerTest;
+  registerTest = root.Substance.Test.registerTest;
 }
 
 var ArrayOperation = Operator.ArrayOperation;
