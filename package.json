@@ -4,7 +4,7 @@
   "keywords": ["substance", "operational transformation"],
   "author": "Oliver Buchtala",
   "contributors": ["Michael Aufreiter"],
-  "version": "0.1.0",
+  "version": "0.2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/substance/operator.git"
@@ -15,8 +15,8 @@
   "dependencies": {
     "underscore": "1.5.x",
     "mocha": "1.12.0",
-    "substance-util": "0.1.0",
-    "substance-test": "0.1.0"
+    "substance-util": "0.2.0",
+    "substance-test": "0.2.0"
   },
   "scripts": {
     "test": "mocha -R spec tests/tests.js"
