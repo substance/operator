@@ -33,6 +33,14 @@ var TextOperationTest = function() {
 
   this.actions = [
 
+    "Apply: Insert char at the string end", function() {
+      var input = "Lorem ipsum";
+      var expected = "Lorem ipsum.";
+      var a = TextOperation.Insert(11, ".");
+      assert.isEqual(expected, a.apply(input));
+    },
+
+
     "Transformation: a=Insert, b=Insert, a before b", function() {
 
       var input = "Lorem ipsum";
