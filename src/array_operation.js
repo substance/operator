@@ -149,28 +149,15 @@ ArrayOperation.__prototype__ = function() {
 
     // Insert
     if (this.type === INS) {
-      if (array.length < this.pos) {
-        throw new errors.OperatorError("Provided array is too small.");
-      }
-
       adapter.insert(this.pos, this.val);
     }
-
     // Delete
     else if (this.type === DEL) {
-      if (array.length < this.pos) {
-        throw new errors.OperatorError("Provided array is too small.");
-      }
-      if (array[this.pos] !== this.val) {
-        throw new errors.OperatorError("Unexpected value at position " + this.pos + ". Expected " + this.val + ", found " + array[this.pos]);
-      }
       adapter.delete(this.pos, this.val);
     }
-
     else {
       throw new errors.OperatorError("Illegal state.");
     }
-
     return array;
   };
 
@@ -622,10 +609,19 @@ var ArrayAdapter = function(arr) {
 
 ArrayAdapter.prototype = {
   insert: function(pos, val) {
+    if (this.array.length < pos) {
+      throw new errors.OperatorError("Provided array is too small.");
+    }
     this.array.splice(pos, 0, val);
   },
 
-  delete: function(pos) {
+  delete: function(pos, val) {
+    if (this.array.length < pos) {
+      throw new errors.OperatorError("Provided array is too small.");
+    }
+    if (this.array[pos] !== val) {
+      throw new errors.OperatorError("Unexpected value at position " + pos + ". Expected " + val + ", found " + this.array[pos]);
+    }
     this.array.splice(pos, 1);
   },
 
