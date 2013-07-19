@@ -4,7 +4,7 @@ var Test = require('substance-test');
 var assert = Test.assert;
 var util = require('substance-util');
 var errors = util.errors;
-var operator = require('..');
+var operator = require('../index');
 var registerTest = Test.registerTest;
 
 

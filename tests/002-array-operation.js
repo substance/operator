@@ -2,7 +2,7 @@
 
 var Test = require('substance-test');
 var assert = Test.assert;
-var operator = require('..');
+var operator = require('../index');
 var registerTest = Test.registerTest;
 
 var ArrayOperation = operator.ArrayOperation;
