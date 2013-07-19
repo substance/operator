@@ -1,27 +1,14 @@
-(function(root) { "use strict";
+"use strict";
 
 // Import
 // ========
 
-var _,
-    errors,
-    util,
-    Compound,
-    Operation;
+var _ = require('underscore');
+var util = require('substance-util');
+var errors = util.errors;
+var Operation = require('./operation');
+var Compound = require('./compound');
 
-if (typeof exports !== 'undefined') {
-  _ = require('underscore');
-  errors   = require('substance-util/errors');
-  util   = require('substance-util');
-  Operation = require('./operation');
-  Compound = require('./compound');
-} else {
-  _ = root._;
-  errors = root.Substance.errors;
-  util = root.Substance.util;
-  Operation = root.Substance.Operator.Operation;
-  Compound = root.Substance.Operator.Compound;
-}
 
 var INS = "+";
 var DEL = "-";
@@ -475,10 +462,4 @@ TextOperation.DELETE = DEL;
 // Export
 // ========
 
-if (typeof exports !== 'undefined') {
-  module.exports = TextOperation;
-} else {
-  root.Substance.Operator.TextOperation = TextOperation;
-}
-
-})(this);
+module.exports = TextOperation;

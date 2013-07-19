@@ -1,33 +1,15 @@
-(function(root) { "use strict";
+"use strict";
 
 // Import
 // ========
 
-var _,
-    errors,
-    util,
-    Operation,
-    Compound,
-    TextOperation,
-    ArrayOperation;
-
-if (typeof exports !== 'undefined') {
-  _ = require('underscore');
-  util   = require('substance-util');
-  errors   = require('substance-util/errors');
-  Operation = require('./operation');
-  Compound = require('./compound');
-  TextOperation = require('./text_operation');
-  ArrayOperation = require('./array_operation');
-} else {
-  _ = root._;
-  util = root.Substance.util;
-  errors = root.Substance.errors;
-  Operation = root.Substance.Operator.Operation;
-  Compound = root.Substance.Operator.Compound;
-  TextOperation = root.Substance.Operator.TextOperation;
-  ArrayOperation = root.Substance.Operator.ArrayOperation;
-}
+var _ = require('underscore');
+var util = require('substance-util');
+var errors = util.errors;
+var Operation = require('./operation');
+var Compound = require('./compound');
+var TextOperation = require('./text_operation');
+var ArrayOperation = require('./array_operation');
 
 var NOP = "NOP";
 var CREATE = "create";
@@ -551,11 +533,4 @@ ObjectOperation.SET = SET;
 // Export
 // ========
 
-
-if (typeof exports !== 'undefined') {
-  module.exports = ObjectOperation;
-} else {
-  root.Substance.Operator.ObjectOperation = ObjectOperation;
-}
-
-})(this);
+module.exports = ObjectOperation;

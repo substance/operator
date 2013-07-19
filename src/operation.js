@@ -1,21 +1,12 @@
-(function(root) { "use strict";
+"use strict";
 
 // Import
 // ========
 
-var _,
-    errors,
-    util;
+var _ = require('underscore');
+var util   = require('substance-util');
+var errors   = util.errors;
 
-if (typeof exports !== 'undefined') {
-  _ = require('underscore');
-  util   = require('substance-util');
-  errors   = require('substance-util/errors');
-} else {
-  _ = root._;
-  util = root.Substance.util;
-  errors = root.Substance.errors;
-}
 
 errors.define("OperationError", -1);
 errors.define("Conflict", -1);
@@ -54,12 +45,4 @@ Operation.conflict = function(a, b) {
 // Export
 // ========
 
-if (typeof exports !== 'undefined') {
-  module.exports = Operation;
-} else {
-  root.Substance.Operator = {};
-  root.Substance.Operator.Operation = Operation;
-}
-
-
-})(this);
+module.exports = Operation;

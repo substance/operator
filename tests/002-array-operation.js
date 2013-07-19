@@ -1,20 +1,11 @@
-(function(root) {
+"use strict";
 
-var assert,
-    Operator,
-    registerTest;
+var test = require('substance-test');
+var assert = test.assert;
+var operator = require('..');
+var registerTest = test.Test.registerTest;
 
-if (typeof exports !== 'undefined') {
-  assert   = require('substance-test/assert');
-  Operator = require('..');
-  registerTest = require('substance-test').Test.registerTest;
-} else {
-  assert = root.Substance.assert;
-  Operator = root.Substance.Operator;
-  registerTest = root.Substance.Test.registerTest;
-}
-
-var ArrayOperation = Operator.ArrayOperation;
+var ArrayOperation = operator.ArrayOperation;
 
 function testTransform(a, b, input, expected) {
   var t = ArrayOperation.transform(a, b);
@@ -270,5 +261,3 @@ var ArrayOperationTest = function() {
 };
 
 registerTest(['Operator', 'Array Operation'], new ArrayOperationTest());
-
-})(this);

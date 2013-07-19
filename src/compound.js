@@ -1,21 +1,15 @@
-(function(root) { "use strict";
+"use strict";
 
 // Import
 // ========
 
-var _,
-   util,
-   Operation;
+var _    = require('underscore');
+var util   = require('substance-util');
+var Operation = require('./operation');
 
-if (typeof exports !== 'undefined') {
-  _    = require('underscore');
-  util   = require('substance-util');
-  Operation = require('./operation');
-} else {
-  _ = root._;
-  util = root.Substance.util;
-  Operation = root.Substance.Operator.Operation;
-}
+
+// Module
+// ========
 
 var COMPOUND = "compound";
 
@@ -123,10 +117,4 @@ Compound.createTransform = function(primitive_transform) {
 // Export
 // ========
 
-if (typeof exports !== 'undefined') {
-  module.exports = Compound;
-} else {
-  root.Substance.Operator.Compound = Compound;
-}
-
-})(this);
+module.exports = Compound;
