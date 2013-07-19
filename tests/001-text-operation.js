@@ -2,9 +2,9 @@
 
 var test = require('substance-test');
 var assert = test.assert;
+var registerTest = test.Test.registerTest;
 
 var TextOperation = require("..").TextOperation;
-var registerTest = test.Test.registerTest;
 
 function testTransform(a, b, input, expected) {
 
