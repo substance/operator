@@ -1,8 +1,8 @@
 "use strict";
 
-var test = require('substance-test');
-var assert = test.assert;
-var registerTest = test.Test.registerTest;
+var Test = require('substance-test');
+var assert = Test.assert;
+var registerTest = Test.registerTest;
 
 var TextOperation = require("..").TextOperation;
 

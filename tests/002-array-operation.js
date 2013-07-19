@@ -1,9 +1,9 @@
 "use strict";
 
-var test = require('substance-test');
-var assert = test.assert;
+var Test = require('substance-test');
+var assert = Test.assert;
 var operator = require('..');
-var registerTest = test.Test.registerTest;
+var registerTest = Test.registerTest;
 
 var ArrayOperation = operator.ArrayOperation;
 

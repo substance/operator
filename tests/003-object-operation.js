@@ -1,11 +1,11 @@
 "use strict";
 
-var test = require('substance-test');
-var assert = test.assert;
+var Test = require('substance-test');
+var assert = Test.assert;
 var util = require('substance-util');
 var errors = util.errors;
 var operator = require('..');
-var registerTest = test.Test.registerTest;
+var registerTest = Test.registerTest;
 
 
 var ObjectOperation = operator.ObjectOperation;
