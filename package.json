@@ -19,6 +19,6 @@
     "substance-test": "0.2.0"
   },
   "scripts": {
-    "test": "mocha -R spec tests/tests.js"
+    "test": "mocha -R spec tests/run.js"
   }
 }
