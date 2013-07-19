@@ -4,7 +4,7 @@ var Test = require('substance-test');
 var assert = Test.assert;
 var registerTest = Test.registerTest;
 
-var TextOperation = require("..").TextOperation;
+var TextOperation = require("../index").TextOperation;
 
 function testTransform(a, b, input, expected) {
 
