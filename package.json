@@ -18,6 +18,10 @@
     "substance-util": "0.2.0",
     "substance-test": "0.2.0"
   },
+  "devDependencies": {
+    "substance-util": "git://github.com/substance/util.git#master",
+    "substance-test": "git://github.com/substance/test.git#master"
+  },
   "scripts": {
     "test": "mocha -R spec tests/run.js"
   }
