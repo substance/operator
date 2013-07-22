@@ -380,6 +380,8 @@ var Range = function(range) {
 
 var range_transform = function(range, textOp, expand) {
 
+  var changed = false;
+
   // handle compound operations
   if (textOp.type === Compound.TYPE) {
     for (var idx = 0; idx < textOp.ops.length; idx++) {
@@ -407,9 +409,11 @@ var range_transform = function(range, textOp, expand) {
 
     if (pos1 <= start) {
       start -= Math.min(pos2-pos1, start-pos1);
+      changed = true;
     }
     if (pos1 <= end) {
       end -= Math.min(pos2-pos1, end-pos1);
+      changed = true;
     }
 
   } else if (textOp.type === INS) {
@@ -419,22 +423,28 @@ var range_transform = function(range, textOp, expand) {
     if ( (pos < start) ||
          (pos === start && !expand) ) {
       start += l;
+      changed = true;
     }
 
     if ( (pos < end) ||
          (pos === end && expand) ) {
       end += l;
+      changed = true;
     }
   }
 
 
-  if (_.isArray(range)) {
-    range[0] = start;
-    range[1] = end;
-  } else {
-    range.start = start;
-    range.length = end - start;
+  if (changed) {
+    if (_.isArray(range)) {
+      range[0] = start;
+      range[1] = end;
+    } else {
+      range.start = start;
+      range.length = end - start;
+    }
   }
+
+  return changed;
 };
 
 Range.__prototype__ = function() {
@@ -453,14 +463,14 @@ Range.__prototype__ = function() {
   };
 
   this.transform = function(textOp, expand) {
-    range_transform(this.range, textOp, expand);
+    return range_transform(this.range, textOp, expand);
   };
 
 };
 Range.prototype = new Range.__prototype__();
 
 Range.transform = function(range, op, expand) {
-  range_transform(range, op, expand);
+  return range_transform(range, op, expand);
 };
 
 Range.fromJSON = function(data) {
