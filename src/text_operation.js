@@ -390,8 +390,15 @@ var range_transform = function(range, textOp, expand) {
   }
 
 
-  var start = range.start;
-  var end = start + range.length;
+  var start, end;
+
+  if (_.isArray(range)) {
+    start = range[0];
+    end = range[1];
+  } else {
+    start = range.start;
+    end = start + range.length;
+  }
 
   // Delete
   if (textOp.type === DEL) {
@@ -420,8 +427,14 @@ var range_transform = function(range, textOp, expand) {
     }
   }
 
-  range.start = start;
-  range.length = end - start;
+
+  if (_.isArray(range)) {
+    range[0] = start;
+    range[1] = end;
+  } else {
+    range.start = start;
+    range.length = end - start;
+  }
 };
 
 Range.__prototype__ = function() {
