@@ -578,6 +578,26 @@ ArrayOperation.Sequence = function(seq) {
   return new Compound(ops);
 };
 
+ArrayOperation.create = function(array, spec) {
+  var type = spec[0];
+  var val, pos;
+  if (type === INS || type === "+") {
+    pos = spec[1];
+    val = spec[2];
+    return ArrayOperation.Insert(pos, val);
+  } else if (type === DEL || type === "-") {
+    pos = spec[1];
+    val = array[pos];
+    return ArrayOperation.Delete(pos, val);
+  } else if (type === MOV || type === ">>") {
+    pos = spec[1];
+    var target = spec[2];
+    return ArrayOperation.Move(pos, target);
+  } else {
+    throw new errors.OperationError("Illegal specification.");
+  }
+};
+
 var ArrayAdapter = function(arr) {
   this.array = arr;
 };
