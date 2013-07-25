@@ -9,8 +9,6 @@ var errors = util.errors;
 var Operation = require('./operation');
 var Compound = require('./compound');
 
-
-
 var NOP = "NOP";
 var DEL = "delete";
 var INS = "insert";
@@ -41,6 +39,7 @@ var MOV = 'move';
 //
 // The value must be specified too as otherwise the operation would not be invertible.
 //
+var Move;
 
 var ArrayOperation = function(options) {
 
@@ -57,7 +56,7 @@ var ArrayOperation = function(options) {
   }
 
   if (options.type === undefined) {
-    throw new errors.OperatorError("Illegal argument: insufficient data.");
+    throw new errors.OperationError("Illegal argument: insufficient data.");
   }
 
   // Insert: '+', Delete: '-', Move: '>>'
@@ -76,25 +75,25 @@ var ArrayOperation = function(options) {
 
   // sanity checks
   if(this.type !== NOP && this.type !== INS && this.type !== DEL && this.type !== MOV) {
-    throw new errors.OperatorError("Illegal type.");
+    throw new errors.OperationError("Illegal type.");
   }
 
   if (this.type === INS || this.type === DEL) {
     if (this.pos === undefined || this.val === undefined) {
-      throw new errors.OperatorError("Illegal argument: insufficient data.");
+      throw new errors.OperationError("Illegal argument: insufficient data.");
     }
     if (!_.isNumber(this.pos) && this.pos < 0) {
-      throw new errors.OperatorError("Illegal argument: expecting positive number as pos.");
+      throw new errors.OperationError("Illegal argument: expecting positive number as pos.");
     }
   } else if (this.type === MOV) {
     if (this.pos === undefined || this.target === undefined) {
-      throw new errors.OperatorError("Illegal argument: insufficient data.");
+      throw new errors.OperationError("Illegal argument: insufficient data.");
     }
     if (!_.isNumber(this.pos) && this.pos < 0) {
-      throw new errors.OperatorError("Illegal argument: expecting positive number as pos.");
+      throw new errors.OperationError("Illegal argument: expecting positive number as pos.");
     }
     if (!_.isNumber(this.target) && this.target < 0) {
-      throw new errors.OperatorError("Illegal argument: expecting positive number as target.");
+      throw new errors.OperationError("Illegal argument: expecting positive number as target.");
     }
   }
 };
@@ -144,7 +143,7 @@ ArrayOperation.__prototype__ = function() {
       adapter.delete(this.pos, this.val);
     }
     else {
-      throw new errors.OperatorError("Illegal state.");
+      throw new errors.OperationError("Illegal state.");
     }
     return array;
   };
@@ -155,7 +154,7 @@ ArrayOperation.__prototype__ = function() {
     if (this.type === INS) data.type = DEL;
     else if (this.type === DEL) data.type = INS;
     else {
-      throw new errors.OperatorError("Illegal state.");
+      throw new errors.OperationError("Illegal state.");
     }
 
     return new ArrayOperation(data);
@@ -392,7 +391,7 @@ var Move = function(source, target) {
   this.target = target;
 
   if (!_.isNumber(this.pos) || !_.isNumber(this.target) || this.pos < 0 || this.target < 0) {
-    throw new errors.OperatorError("Illegal argument");
+    throw new errors.OperationError("Illegal argument");
   }
 };
 
@@ -469,15 +468,15 @@ var lcss = function(arr1, arr2) {
 
 
 ArrayOperation.Insert = function(pos, val) {
-  return new ArrayOperation([INS, pos, val]);
+  return new ArrayOperation({type:INS, pos: pos, val: val});
 };
 
 ArrayOperation.Delete = function(pos, val) {
   if (_.isArray(pos)) {
     pos = pos.indexOf(val);
   }
-  if (pos < 0) return new ArrayOperation([NOP]);
-  return new ArrayOperation([DEL, pos, val]);
+  if (pos < 0) return new ArrayOperation({type: NOP});
+  return new ArrayOperation({type:DEL, pos: pos, val: val});
 };
 
 ArrayOperation.Move = function(pos1, pos2) {
@@ -583,7 +582,7 @@ ArrayOperation.Sequence = function(seq) {
       } else if (s[0] === "-") {
         ops.push(ArrayOperation.Delete(pos, s[1]));
       } else {
-        throw new errors.OperatorError("Illegal operation.");
+        throw new errors.OperationError("Illegal operation.");
       }
     }
   }
@@ -598,29 +597,29 @@ var ArrayAdapter = function(arr) {
 ArrayAdapter.prototype = {
   insert: function(pos, val) {
     if (this.array.length < pos) {
-      throw new errors.OperatorError("Provided array is too small.");
+      throw new errors.OperationError("Provided array is too small.");
     }
     this.array.splice(pos, 0, val);
   },
 
   delete: function(pos, val) {
     if (this.array.length < pos) {
-      throw new errors.OperatorError("Provided array is too small.");
+      throw new errors.OperationError("Provided array is too small.");
     }
     if (this.array[pos] !== val) {
-      throw new errors.OperatorError("Unexpected value at position " + pos + ". Expected " + val + ", found " + this.array[pos]);
+      throw new errors.OperationError("Unexpected value at position " + pos + ". Expected " + val + ", found " + this.array[pos]);
     }
     this.array.splice(pos, 1);
   },
 
   move: function(val, pos, to) {
     if (this.array.length < pos) {
-      throw new errors.OperatorError("Provided array is too small.");
+      throw new errors.OperationError("Provided array is too small.");
     }
     this.array.splice(pos, 1);
 
     if (this.array.length < to) {
-      throw new errors.OperatorError("Provided array is too small.");
+      throw new errors.OperationError("Provided array is too small.");
     }
     this.array.splice(to, 0, val);
   }
