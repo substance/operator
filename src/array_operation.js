@@ -43,18 +43,6 @@ var Move;
 
 var ArrayOperation = function(options) {
 
-  // if this operation should be created using an array
-  if (_.isArray(options)) {
-    var tmp = {
-      type: options[0]
-    };
-
-    tmp.pos = options[1];
-    tmp.val = options[2];
-
-    options = tmp;
-  }
-
   if (options.type === undefined) {
     throw new errors.OperationError("Illegal argument: insufficient data.");
   }
