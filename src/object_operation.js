@@ -32,7 +32,7 @@ var ObjectOperation = function(data) {
       this.diff = data.diff;
       this.propertyType = data.propertyType;
     } else {
-      throw new errors.ChronicleError("Illegal argument: update by value or by diff must be provided");
+      throw new errors.OperationError("Illegal argument: update by value or by diff must be provided");
     }
   }
 
@@ -40,11 +40,9 @@ var ObjectOperation = function(data) {
     this.val = data.val;
     this.original = data.original;
   }
-
 };
 
 ObjectOperation.fromJSON = function(data) {
-
   if (data.type === Compound.TYPE) {
     var ops = [];
     for (var idx = 0; idx < data.ops.length; idx++) {
@@ -84,7 +82,7 @@ ObjectOperation.__prototype__ = function() {
     if (this.type === DELETE) {
       // TODO: maybe we could tolerate such deletes
       if (val === undefined) {
-        throw new errors.ChronicleError("Property " + JSON.stringify(this.path) + " not found.");
+        throw new errors.OperationError("Property " + JSON.stringify(this.path) + " not found.");
       }
       adapter.delete(this.path, val);
     }
@@ -103,7 +101,7 @@ ObjectOperation.__prototype__ = function() {
         adapter.set(this.path, val);
       }
       else {
-        throw new errors.ChronicleError("Unsupported type for operational update.");
+        throw new errors.OperationError("Unsupported type for operational update.");
       }
     }
 
@@ -112,7 +110,7 @@ ObjectOperation.__prototype__ = function() {
     }
 
     else {
-      throw new errors.ChronicleError("Illegal state.");
+      throw new errors.OperationError("Illegal state.");
     }
 
     return obj;
@@ -151,7 +149,7 @@ ObjectOperation.__prototype__ = function() {
     }
 
     else {
-      throw new errors.ChronicleError("Illegal state.");
+      throw new errors.OperationError("Illegal state.");
     }
 
     return result;
@@ -226,7 +224,7 @@ ObjectOperation.Object.__prototype__ = function() {
   this.create = function(path, value) {
     var item = resolve(this, this.obj, path, true);
     if (item.parent[item.key] !== undefined) {
-      throw new errors.ChronicleError("Value already exists. path =" + JSON.stringify(path));
+      throw new errors.OperationError("Value already exists. path =" + JSON.stringify(path));
     }
     item.parent[item.key] = value;
   };
@@ -265,7 +263,7 @@ var transform_delete_delete = function(a, b) {
 var transform_create_create = function() {
   // TODO: maybe it would be possible to create an differntial update that transforms the one into the other
   // However, we fail for now.
-  throw new errors.ChronicleError("Can not transform two concurring creates of the same property");
+  throw new errors.OperationError("Can not transform two concurring creates of the same property");
 };
 
 var transform_delete_create = function(a, b, flipped) {
@@ -309,7 +307,7 @@ var transform_delete_update = function(a, b, flipped) {
 
 var transform_create_update = function() {
   // it is not possible to reasonably transform this.
-  throw new errors.ChronicleError("Can not transform a concurring create and update of the same property");
+  throw new errors.OperationError("Can not transform a concurring create and update of the same property");
 };
 
 var transform_update_update = function(a, b) {
@@ -364,7 +362,7 @@ var transform_delete_set = function(a, b, flipped) {
 };
 
 var transform_update_set = function() {
-  throw new errors.ChronicleError("Can not transform update/set of the same property.");
+  throw new errors.OperationError("Can not transform update/set of the same property.");
 };
 
 var transform_set_set = function(a, b) {
@@ -498,7 +496,7 @@ var __extend__ = function(obj, newVals, path, deletes, creates, updates) {
 
       // TODO: for now, the structure must be the same
       if (!_.isObject(obj[key])) {
-        throw new errors.ChronicleError("Incompatible arguments: newVals must have same structure as obj.");
+        throw new errors.OperationError("Incompatible arguments: newVals must have same structure as obj.");
       }
       __extend__(obj[key], newVals[key], p, deletes, creates, updates);
 

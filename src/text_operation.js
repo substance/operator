@@ -25,7 +25,7 @@ var TextOperation = function(options) {
   }
 
   if (options.type === undefined || options.pos === undefined || options.str === undefined) {
-    throw new errors.ChronicleError("Illegal argument: insufficient data.");
+    throw new errors.OperationError("Illegal argument: insufficient data.");
   }
 
   // '+' or '-'
@@ -39,13 +39,13 @@ var TextOperation = function(options) {
 
   // sanity checks
   if(!this.isInsert() && !this.isDelete()) {
-    throw new errors.ChronicleError("Illegal type.");
+    throw new errors.OperationError("Illegal type.");
   }
   if (!_.isString(this.str)) {
-    throw new errors.ChronicleError("Illegal argument: expecting string.");
+    throw new errors.OperationError("Illegal argument: expecting string.");
   }
   if (!_.isNumber(this.pos) && this.pos < 0) {
-    throw new errors.ChronicleError("Illegal argument: expecting positive number as pos.");
+    throw new errors.OperationError("Illegal argument: expecting positive number as pos.");
   }
 };
 
@@ -97,7 +97,7 @@ TextOperation.__prototype__ = function() {
       adapter.delete(this.pos, this.str.length);
     }
     else {
-      throw new errors.ChronicleError("Illegal operation type: " + this.type);
+      throw new errors.OperationError("Illegal operation type: " + this.type);
     }
 
     return adapter.get();
@@ -295,14 +295,14 @@ var StringAdapter = function(str) {
 StringAdapter.prototype = {
   insert: function(pos, str) {
     if (this.str.length < pos) {
-      throw new errors.ChronicleError("Provided string is too short.");
+      throw new errors.OperationError("Provided string is too short.");
     }
     this.str = this.str.slice(0, pos) + str + this.str.slice(pos);
   },
 
   delete: function(pos, length) {
     if (this.str.length < pos + length) {
-      throw new errors.ChronicleError("Provided string is too short.");
+      throw new errors.OperationError("Provided string is too short.");
     }
     this.str = this.str.slice(0, pos) + this.str.slice(pos + length);
   },
