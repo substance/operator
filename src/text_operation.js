@@ -362,6 +362,8 @@ TextOperation.fromOT = function(str, ops) {
   return TextOperation.Compound(atomicOps);
 };
 
+TextOperation.fromSequence = TextOperation.fromOT;
+
 // A helper class to model Text selections and to provide an easy way
 // to bookkeep changes by other applied TextOperations
 var Range = function(range) {
