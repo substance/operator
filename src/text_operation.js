@@ -380,7 +380,7 @@ var Range = function(range) {
 // --------
 //
 
-var range_transform = function(range, textOp, expand) {
+var range_transform = function(range, textOp, expandLeft, expandRight) {
 
   var changed = false;
 
@@ -423,18 +423,17 @@ var range_transform = function(range, textOp, expand) {
     var l = textOp.str.length;
 
     if ( (pos < start) ||
-         (pos === start && !expand) ) {
+         (pos === start && !expandLeft) ) {
       start += l;
       changed = true;
     }
 
     if ( (pos < end) ||
-         (pos === end && expand) ) {
+         (pos === end && !expandRight) ) {
       end += l;
       changed = true;
     }
   }
-
 
   if (changed) {
     if (_.isArray(range)) {
