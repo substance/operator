@@ -429,7 +429,7 @@ var range_transform = function(range, textOp, expandLeft, expandRight) {
     }
 
     if ( (pos < end) ||
-         (pos === end && !expandRight) ) {
+         (pos === end && expandRight) ) {
       end += l;
       changed = true;
     }
@@ -470,8 +470,8 @@ Range.__prototype__ = function() {
 };
 Range.prototype = new Range.__prototype__();
 
-Range.transform = function(range, op, expand) {
-  return range_transform(range, op, expand);
+Range.transform = function(range, op, expandLeft, expandRight) {
+  return range_transform(range, op, expandLeft, expandRight);
 };
 
 Range.fromJSON = function(data) {
