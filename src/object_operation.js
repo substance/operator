@@ -106,7 +106,7 @@ ObjectOperation.__prototype__ = function() {
     }
 
     else if (this.type === SET) {
-      adapter.set(this.path, this.val);
+      adapter.set(this.path, util.clone(this.val));
     }
 
     else {
