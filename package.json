@@ -1,26 +1,32 @@
 {
   "name": "substance-operator",
   "description": "Provides bricks for a Substance building.",
-  "keywords": ["substance", "operational transformation"],
+  "keywords": [
+    "substance",
+    "operational transformation"
+  ],
   "author": "Oliver Buchtala",
-  "contributors": ["Michael Aufreiter"],
-  "version": "0.2.0-alpha",
+  "contributors": [
+    "Michael Aufreiter"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/substance/operator.git"
   },
-  "engines": {
-    "node": ">=0.8.x"
-  },
   "dependencies": {
     "underscore": "1.5.x",
-    "mocha": "1.12.0",
-    "substance-util": "git+https://github.com/substance/util.git#master"
+    "substance-util": "git+https://github.com/substance/util.git#0.2.1"
   },
   "devDependencies": {
-    "substance-test": "git+https://github.com/substance/test.git#master"
+    "mocha": "1.12.x",
+    "substance-test": "git+https://github.com/substance/test.git#0.2.1"
   },
   "scripts": {
     "test": "mocha -R spec tests/run.js"
+  },
+  "version": "0.2.1",
+  "engines": {
+    "node": ">=0.8.x",
+    "npm": ">=1.1.x"
   }
 }
