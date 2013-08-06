@@ -255,7 +255,7 @@ var transform0 = function(a, b, options) {
   options = options || {};
 
   if (options.check && hasConflict(a, b)) {
-    throw Operator.mergeConflict(a, b);
+    throw Operation.conflict(a, b);
   }
 
   if (!options.inplace) {
