@@ -73,6 +73,7 @@ ObjectOperation.__prototype__ = function() {
     var adapter = (obj instanceof ObjectOperation.Object) ? obj : new ObjectOperation.Object(obj);
 
     if (this.type === CREATE) {
+      // clone here as the operations value must not be changed
       adapter.create(this.path, util.clone(this.val));
       return obj;
     }
@@ -90,15 +91,15 @@ ObjectOperation.__prototype__ = function() {
     else if (this.type === UPDATE) {
       if (this.propertyType === 'object') {
         val = ObjectOperation.apply(this.diff, val);
-        if(!adapter.inplace()) adapter.set(this.path, val);
+        if(!adapter.inplace()) adapter.update(this.path, val, this.diff);
       }
       else if (this.propertyType === 'array') {
         val = ArrayOperation.apply(this.diff, val);
-        if(!adapter.inplace()) adapter.set(this.path, val);
+        if(!adapter.inplace()) adapter.update(this.path, val, this.diff);
       }
       else if (this.propertyType === 'string') {
         val = TextOperation.apply(this.diff, val);
-        adapter.set(this.path, val);
+        adapter.update(this.path, val, this.diff);
       }
       else {
         throw new errors.OperationError("Unsupported type for operational update.");
@@ -106,6 +107,7 @@ ObjectOperation.__prototype__ = function() {
     }
 
     else if (this.type === SET) {
+      // clone here as the operations value must not be changed
       adapter.set(this.path, util.clone(this.val));
     }
 
@@ -227,6 +229,11 @@ ObjectOperation.Object.__prototype__ = function() {
       throw new errors.OperationError("Value already exists. path =" + JSON.stringify(path));
     }
     item.parent[item.key] = value;
+  };
+
+  // Note: in the default implementation we do not need the diff
+  this.update = function(path, value, diff) {
+    this.set(path, value);
   };
 
   this.set = function(path, value) {
