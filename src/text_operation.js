@@ -359,6 +359,10 @@ TextOperation.fromOT = function(str, ops) {
     }
   });
 
+  if (atomicOps.length === 0) {
+    return null;
+  }
+
   return TextOperation.Compound(atomicOps);
 };
 
