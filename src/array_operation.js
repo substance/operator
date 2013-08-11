@@ -165,6 +165,22 @@ ArrayOperation.__prototype__ = function() {
     return result;
   };
 
+  this.isInsert = function() {
+    return this.type === INS;
+  };
+
+  this.isDelete = function() {
+    return this.type === DEL;
+  };
+
+  this.isNOP = function() {
+    return this.type === NOP;
+  };
+
+  this.isMove = function() {
+    return this.type === MOV;
+  };
+
 };
 ArrayOperation.__prototype__.prototype = Operation.prototype;
 ArrayOperation.prototype = new ArrayOperation.__prototype__();
