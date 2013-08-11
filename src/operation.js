@@ -3,13 +3,11 @@
 // Import
 // ========
 
-var _ = require('underscore');
 var util   = require('substance-util');
 var errors   = util.errors;
 
-
-errors.define("OperationError", -1);
-errors.define("Conflict", -1);
+var OperationError = errors.define("OperationError", -1);
+var Conflict = errors.define("Conflict", -1);
 
 var Operation = function() {};
 
@@ -41,6 +39,9 @@ Operation.conflict = function(a, b) {
   conflict.b = b;
   return conflict;
 };
+
+Operation.OperationError = OperationError;
+Operation.Conflict = Conflict;
 
 // Export
 // ========
