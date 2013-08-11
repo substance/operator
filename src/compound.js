@@ -7,7 +7,6 @@ var _    = require('underscore');
 var util   = require('substance-util');
 var Operation = require('./operation');
 
-
 // Module
 // ========
 
@@ -17,6 +16,10 @@ var Compound = function(ops) {
   this.type = COMPOUND;
   this.ops = ops;
   this.alias = undefined;
+
+  if (!ops || ops.length === 0) {
+    throw new Operation.OperationError("No operations given.");
+  }
 };
 
 Compound.__prototype__ = function() {
