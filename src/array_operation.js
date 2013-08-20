@@ -536,7 +536,9 @@ ArrayOperation.Update = function(oldArray, newArray) {
 };
 
 ArrayOperation.Compound = function(ops) {
-  return new Compound(ops);
+  // do not create a Compound if not necessary
+  if (ops.length === 1) return ops[0];
+  else return new Compound(ops);
 };
 
 // Convenience factory method to create an operation that clears the given array.
