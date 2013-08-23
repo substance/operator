@@ -485,7 +485,8 @@ ObjectOperation.Set = function(path, oldVal, newVal) {
 };
 
 ObjectOperation.Compound = function(ops) {
-  return new Compound(ops);
+  if (ops.length === 0) return null;
+  else return new Compound(ops);
 };
 
 // TODO: this can not deal with cyclic references
