@@ -141,6 +141,7 @@ ArrayOperation.__prototype__ = function() {
 
     if (this.type === INS) data.type = DEL;
     else if (this.type === DEL) data.type = INS;
+    else if (this.type === NOP) data.type = NOP;
     else {
       throw new errors.OperationError("Illegal state.");
     }
