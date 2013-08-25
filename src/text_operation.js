@@ -70,7 +70,7 @@ TextOperation.__prototype__ = function() {
   };
 
   this.isNOP = function() {
-    return this.str.length === 0;
+    return this.type === "NOP" || this.str.length === 0;
   };
 
   this.isInsert = function() {
