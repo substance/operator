@@ -7,15 +7,36 @@ Helpers.last = function(op) {
   return op;
 };
 
-Helpers.each = function(op, iterator, context) {
+// Iterates all atomic operations contained in a given operation
+// --------
+//
+// - op: an Operation instance
+// - iterator: a `function(op)`
+// - context: the `this` context for the iterator function
+// - reverse: if present, the operations are iterated reversely
+
+Helpers.each = function(op, iterator, context, reverse) {
   if (op.type === "compound") {
-    for (var i = 0; i < op.ops.length; i++) {
+    var l = op.ops.length;
+    for (var i = 0; i < l; i++) {
       var child = op.ops[i];
-      if (child.type === "compound") Helpers.each(child, iterator, context);
-      else iterator.call(context, child);
+      if (reverse) {
+        child = op.ops[l-i-1];
+      }
+      if (child.type === "compound") {
+        if (Helpers.each(child, iterator, context, reverse) === false) {
+          return false;
+        }
+      }
+      else {
+        if (iterator.call(context, child) === false) {
+          return false;
+        }
+      }
     }
+    return true;
   } else {
-    iterator.call(context, op);
+    return iterator.call(context, op);
   }
 };
 
