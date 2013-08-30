@@ -22,7 +22,7 @@ var Compound = function(ops) {
   }
 };
 
-Compound.__prototype__ = function() {
+Compound.Prototype = function() {
 
   this.clone = function() {
     var ops = [];
@@ -59,8 +59,8 @@ Compound.__prototype__ = function() {
   };
 
 };
-Compound.__prototype__.prototype = Operation.prototype;
-Compound.prototype = new Compound.__prototype__();
+Compound.Prototype.prototype = Operation.prototype;
+Compound.prototype = new Compound.Prototype();
 
 Compound.TYPE = COMPOUND;
 

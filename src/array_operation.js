@@ -108,7 +108,7 @@ ArrayOperation.fromJSON = function(data) {
   }
 };
 
-ArrayOperation.__prototype__ = function() {
+ArrayOperation.Prototype = function() {
 
   this.clone = function() {
     return new ArrayOperation(this);
@@ -183,8 +183,8 @@ ArrayOperation.__prototype__ = function() {
   };
 
 };
-ArrayOperation.__prototype__.prototype = Operation.prototype;
-ArrayOperation.prototype = new ArrayOperation.__prototype__();
+ArrayOperation.Prototype.prototype = Operation.prototype;
+ArrayOperation.prototype = new ArrayOperation.Prototype();
 
 var _NOP = 0;
 var _DEL = 1;
@@ -400,7 +400,7 @@ var Move = function(source, target) {
   }
 };
 
-Move.__prototype__ = function() {
+Move.Prototype = function() {
 
   this.clone = function() {
     return new Move(this.pos, this.target);
@@ -430,8 +430,8 @@ Move.__prototype__ = function() {
   };
 
 };
-Move.__prototype__.prototype = ArrayOperation.prototype;
-Move.prototype = new Move.__prototype__();
+Move.Prototype.prototype = ArrayOperation.prototype;
+Move.prototype = new Move.Prototype();
 
 Move.fromJSON = function(data) {
   return new Move(data.pos, data.target);
