@@ -269,10 +269,10 @@ var ObjectOperationTest = function() {
 
       testTransform(a, b, input, expected1);
       testTransform(b, a, input, expected2);
-    },
+    }
 
   ];
 
 };
 
-registerTest(['Operator', 'Object Operation'], new ObjectOperationTest());
+registerTest(['Substance.Operator', 'Object Operation'], new ObjectOperationTest());

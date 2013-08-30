@@ -126,4 +126,4 @@ var TextOperationTest = function() {
 
 };
 
-registerTest(['Operator', 'Text Operation'], new TextOperationTest());
+registerTest(['Substance.Operator', 'Text Operation'], new TextOperationTest());

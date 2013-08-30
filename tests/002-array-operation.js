@@ -260,4 +260,4 @@ var ArrayOperationTest = function() {
 
 };
 
-registerTest(['Operator', 'Array Operation'], new ArrayOperationTest());
+registerTest(['Substance.Operator', 'Array Operation'], new ArrayOperationTest());
