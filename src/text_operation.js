@@ -63,7 +63,7 @@ TextOperation.fromJSON = function(data) {
   }
 };
 
-TextOperation.__prototype__ = function() {
+TextOperation.Prototype = function() {
 
   this.clone = function() {
     return new TextOperation(this);
@@ -129,8 +129,8 @@ TextOperation.__prototype__ = function() {
   };
 
 };
-TextOperation.__prototype__.prototype = Operation.prototype;
-TextOperation.prototype = new TextOperation.__prototype__();
+TextOperation.Prototype.prototype = Operation.prototype;
+TextOperation.prototype = new TextOperation.Prototype();
 
 var hasConflict = function(a, b) {
 
@@ -452,7 +452,7 @@ var range_transform = function(range, textOp, expandLeft, expandRight) {
   return changed;
 };
 
-Range.__prototype__ = function() {
+Range.Prototype = function() {
 
   this.clone = function() {
     return new Range(this);
@@ -472,7 +472,7 @@ Range.__prototype__ = function() {
   };
 
 };
-Range.prototype = new Range.__prototype__();
+Range.prototype = new Range.Prototype();
 
 Range.transform = function(range, op, expandLeft, expandRight) {
   return range_transform(range, op, expandLeft, expandRight);

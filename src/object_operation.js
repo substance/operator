@@ -55,7 +55,7 @@ ObjectOperation.fromJSON = function(data) {
   }
 };
 
-ObjectOperation.__prototype__ = function() {
+ObjectOperation.Prototype = function() {
 
   this.clone = function() {
     return new ObjectOperation(this);
@@ -193,14 +193,14 @@ ObjectOperation.__prototype__ = function() {
   };
 
 };
-ObjectOperation.__prototype__.prototype = Operation.prototype;
-ObjectOperation.prototype = new ObjectOperation.__prototype__();
+ObjectOperation.Prototype.prototype = Operation.prototype;
+ObjectOperation.prototype = new ObjectOperation.Prototype();
 
 ObjectOperation.Object = function(obj) {
   this.obj = obj;
 };
 
-ObjectOperation.Object.__prototype__ = function() {
+ObjectOperation.Object.Prototype = function() {
 
   function resolve(self, obj, path, create) {
     var item = obj;
@@ -252,7 +252,7 @@ ObjectOperation.Object.__prototype__ = function() {
   };
 
 };
-ObjectOperation.Object.prototype = new ObjectOperation.Object.__prototype__();
+ObjectOperation.Object.prototype = new ObjectOperation.Object.Prototype();
 
 
 var hasConflict = function(a, b) {
