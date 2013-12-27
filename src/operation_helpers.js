@@ -1,3 +1,8 @@
+"use strict";
+
+var TextOperation = require("./text_operation");
+var ArrayOperation = require("./array_operation");
+
 var Helpers = {};
 
 Helpers.last = function(op) {
@@ -37,6 +42,17 @@ Helpers.each = function(op, iterator, context, reverse) {
     return true;
   } else {
     return iterator.call(context, op);
+  }
+};
+
+Helpers.invert = function(op, type) {
+  switch (type) {
+  case "string":
+    return TextOperation.fromJSON(op).invert();
+  case "array":
+    return ArrayOperation.fromJSON(op).invert();
+  default:
+    throw new Error("Don't know how to invert this operation.");
   }
 };
 
