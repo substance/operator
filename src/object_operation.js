@@ -51,7 +51,20 @@ ObjectOperation.fromJSON = function(data) {
     return ObjectOperation.Compound(ops);
 
   } else {
-    return new ObjectOperation(data);
+    var op = new ObjectOperation(data);
+    if (data.type === "update") {
+      switch (data.propertyType) {
+      case "string":
+        op.diff = TextOperation.fromJSON(op.diff);
+        break;
+      case "array":
+        op.diff = ArrayOperation.fromJSON(op.diff);
+        break;
+      default:
+        throw new Error("Don't know how to deserialize this operation:" + JSON.stringify(data));
+      }
+    }
+    return op;
   }
 };
 
