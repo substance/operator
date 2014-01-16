@@ -484,6 +484,12 @@ ArrayOperation.Delete = function(pos, val) {
   return new ArrayOperation({type:DEL, pos: pos, val: val});
 };
 
+ArrayOperation.DeleteValue = function(arr, val) {
+  var index = arr.indexOf(val);
+  if (index<0) return new ArrayOperation({type: NOP});
+  else return ArrayOperation.Delete(index, val);
+};
+
 ArrayOperation.Move = function(pos1, pos2) {
   return new Move(pos1, pos2);
 };
