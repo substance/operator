@@ -467,6 +467,7 @@ var lcss = function(arr1, arr2) {
 
 // Factory methods
 // -------
+// 
 // Note: you should use these methods instead of manually define
 // an operation. This is allows us to change the underlying implementation
 // without breaking your code.
@@ -476,18 +477,21 @@ ArrayOperation.Insert = function(pos, val) {
   return new ArrayOperation({type:INS, pos: pos, val: val});
 };
 
-ArrayOperation.Delete = function(pos, val) {
+
+// Factory methods
+// -------
+// 
+// Deletes an element from an array
+// When array is provided value is looked up
+// When pos is given, element at that position gets removed
+
+ArrayOperation.Delete = function(posOrArray, val) {
+  var pos = posOrArray;
   if (_.isArray(pos)) {
     pos = pos.indexOf(val);
   }
   if (pos < 0) return new ArrayOperation({type: NOP});
   return new ArrayOperation({type:DEL, pos: pos, val: val});
-};
-
-ArrayOperation.DeleteValue = function(arr, val) {
-  var index = arr.indexOf(val);
-  if (index<0) return new ArrayOperation({type: NOP});
-  else return ArrayOperation.Delete(index, val);
 };
 
 ArrayOperation.Move = function(pos1, pos2) {
