@@ -2,8 +2,6 @@
 
 var Test = require('substance-test');
 var assert = Test.assert;
-var registerTest = Test.registerTest;
-
 var TextOperation = require("../index").TextOperation;
 
 function testTransform(a, b, input, expected) {
@@ -19,6 +17,10 @@ function testTransform(a, b, input, expected) {
 }
 
 var TextOperationTest = function() {
+  Test.call(this);
+};
+
+TextOperationTest.Prototype = function() {
 
   this.actions = [
 
@@ -123,7 +125,8 @@ var TextOperationTest = function() {
     },
 
   ];
-
 };
+TextOperationTest.Prototype.prototype = Test.prototype;
+TextOperationTest.prototype = new TextOperationTest.Prototype();
 
-registerTest(['Substance.Operator', 'Text Operation'], new TextOperationTest());
+Test.registerTest(['Substance.Operator', 'Text Operation'], new TextOperationTest());

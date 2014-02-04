@@ -5,9 +5,6 @@ var assert = Test.assert;
 var util = require('substance-util');
 var errors = util.errors;
 var operator = require('../index');
-var registerTest = Test.registerTest;
-
-
 var ObjectOperation = operator.ObjectOperation;
 var TextOperation = operator.TextOperation;
 var ArrayOperation = operator.ArrayOperation;
@@ -23,6 +20,10 @@ function testTransform(a, b, input, expected) {
 }
 
 var ObjectOperationTest = function() {
+  Test.call(this);
+};
+
+ObjectOperationTest.Prototype = function() {
 
   this.actions = [
 
@@ -270,9 +271,9 @@ var ObjectOperationTest = function() {
       testTransform(a, b, input, expected1);
       testTransform(b, a, input, expected2);
     }
-
   ];
-
 };
+ObjectOperationTest.Prototype.prototype = Test.prototype;
+ObjectOperationTest.prototype = new ObjectOperationTest.Prototype();
 
-registerTest(['Substance.Operator', 'Object Operation'], new ObjectOperationTest());
+Test.registerTest(['Substance.Operator', 'Object Operation'], new ObjectOperationTest());

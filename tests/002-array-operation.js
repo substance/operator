@@ -3,8 +3,6 @@
 var Test = require('substance-test');
 var assert = Test.assert;
 var operator = require('../index');
-var registerTest = Test.registerTest;
-
 var ArrayOperation = operator.ArrayOperation;
 
 function testTransform(a, b, input, expected) {
@@ -19,6 +17,10 @@ function testTransform(a, b, input, expected) {
 }
 
 var ArrayOperationTest = function() {
+  Test.call(this);
+};
+
+ArrayOperationTest.Prototype = function() {
 
   this.actions = [
 
@@ -255,9 +257,9 @@ var ArrayOperationTest = function() {
 
       assert.isArrayEqual(expected, output);
     }
-
   ];
-
 };
+ArrayOperationTest.Prototype.prototype = Test.prototype;
+ArrayOperationTest.prototype = new ArrayOperationTest.Prototype();
 
-registerTest(['Substance.Operator', 'Array Operation'], new ArrayOperationTest());
+Test.registerTest(['Substance.Operator', 'Array Operation'], new ArrayOperationTest());
