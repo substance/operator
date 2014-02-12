@@ -48,7 +48,7 @@ ObjectOperation.fromJSON = function(data) {
     for (var idx = 0; idx < data.ops.length; idx++) {
       ops.push(ObjectOperation.fromJSON(data.ops[idx]));
     }
-    return ObjectOperation.Compound(ops);
+    return ObjectOperation.Compound(ops, data.data);
 
   } else {
     var op = new ObjectOperation(data);
@@ -152,7 +152,8 @@ ObjectOperation.Prototype = function() {
       var invertedDiff;
       if (this.propertyType === 'string') {
         invertedDiff = TextOperation.fromJSON(this.diff).invert();
-      } else if (this.propertyType === 'array') {
+      }
+      else if (this.propertyType === 'array') {
         invertedDiff = ArrayOperation.fromJSON(this.diff).invert();
       }
       result.diff = invertedDiff;
@@ -498,9 +499,9 @@ ObjectOperation.Set = function(path, oldVal, newVal) {
   });
 };
 
-ObjectOperation.Compound = function(ops) {
+ObjectOperation.Compound = function(ops, data) {
   if (ops.length === 0) return null;
-  else return new Compound(ops);
+  else return new Compound(ops, data);
 };
 
 // TODO: this can not deal with cyclic references

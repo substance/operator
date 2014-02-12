@@ -12,10 +12,11 @@ var Operation = require('./operation');
 
 var COMPOUND = "compound";
 
-var Compound = function(ops) {
+var Compound = function(ops, data) {
   this.type = COMPOUND;
   this.ops = ops;
   this.alias = undefined;
+  this.data = data;
 
   if (!ops || ops.length === 0) {
     throw new Operation.OperationError("No operations given.");
@@ -29,7 +30,7 @@ Compound.Prototype = function() {
     for (var idx = 0; idx < this.ops.length; idx++) {
       ops.push(util.clone(this.ops[idx]));
     }
-    return new Compound(ops);
+    return new Compound(ops, util.clone(this.data));
   };
 
   this.apply = function(obj) {
@@ -45,8 +46,7 @@ Compound.Prototype = function() {
       // reverse the order of the inverted atomic commands
       ops.unshift(this.ops[idx].invert());
     }
-
-    return new Compound(ops);
+    return new Compound(ops, this.data);
   };
 
   this.toJSON = function() {
@@ -55,6 +55,7 @@ Compound.Prototype = function() {
       ops: this.ops,
     };
     if (this.alias) result.alias = this.alias;
+    if (this.data) result.data = this.data;
     return result;
   };
 

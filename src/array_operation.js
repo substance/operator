@@ -101,7 +101,7 @@ ArrayOperation.fromJSON = function(data) {
     for (var idx = 0; idx < data.ops.length; idx ++) {
       ops.push(ArrayOperation.fromJSON(data.ops[idx]));
     }
-    return ArrayOperation.Compound(ops);
+    return ArrayOperation.Compound(ops, data.data);
   }
   else  {
     return new ArrayOperation(data);
@@ -467,7 +467,7 @@ var lcss = function(arr1, arr2) {
 
 // Factory methods
 // -------
-// 
+//
 // Note: you should use these methods instead of manually define
 // an operation. This is allows us to change the underlying implementation
 // without breaking your code.
@@ -480,7 +480,7 @@ ArrayOperation.Insert = function(pos, val) {
 
 // Factory methods
 // -------
-// 
+//
 // Deletes an element from an array
 // When array is provided value is looked up
 // When pos is given, element at that position gets removed
@@ -546,10 +546,10 @@ ArrayOperation.Update = function(oldArray, newArray) {
   return ArrayOperation.Sequence(seq);
 };
 
-ArrayOperation.Compound = function(ops) {
+ArrayOperation.Compound = function(ops, data) {
   // do not create a Compound if not necessary
-  if (ops.length === 1) return ops[0];
-  else return new Compound(ops);
+  if (ops.length === 1 && !data) return ops[0];
+  else return new Compound(ops, data);
 };
 
 // Convenience factory method to create an operation that clears the given array.

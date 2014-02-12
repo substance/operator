@@ -56,7 +56,7 @@ TextOperation.fromJSON = function(data) {
     for (var idx = 0; idx < data.ops.length; idx++) {
       ops.push(TextOperation.fromJSON(data.ops[idx]));
     }
-    return TextOperation.Compound(ops);
+    return TextOperation.Compound(ops,data.data);
 
   } else {
     return new TextOperation(data);
@@ -320,10 +320,10 @@ TextOperation.Delete = function(pos, str) {
   return new TextOperation(["-", pos, str]);
 };
 
-TextOperation.Compound = function(ops) {
+TextOperation.Compound = function(ops, data) {
   // do not create a Compound if not necessary
-  if (ops.length === 1) return ops[0];
-  else return new Compound(ops);
+  if (ops.length === 1 && !data) return ops[0];
+  else return new Compound(ops, data);
 };
 
 // Converts from a given a sequence in the format of Tim's lib
