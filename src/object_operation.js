@@ -494,8 +494,8 @@ ObjectOperation.Set = function(path, oldVal, newVal) {
   return new ObjectOperation({
     type: SET,
     path: path,
-    val: newVal,
-    original: oldVal
+    val: _.clone(newVal),
+    original: _.clone(oldVal)
   });
 };
 
