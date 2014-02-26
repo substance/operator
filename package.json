@@ -15,11 +15,11 @@
   },
   "dependencies": {
     "underscore": "1.5.x",
-    "substance-util": "0.3.0"
+    "substance-util": "git+https://github.com/substance/util.git#master"
   },
   "devDependencies": {
     "mocha": "1.12.x",
-    "substance-test": "0.3.0"
+    "substance-test": "git+https://github.com/substance/test.git#master"
   },
   "scripts": {
     "test": "mocha -R spec tests/run.js"
