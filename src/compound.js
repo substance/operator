@@ -3,7 +3,6 @@
 // Import
 // ========
 
-var _    = require('underscore');
 var util   = require('substance-util');
 var Operation = require('./operation');
 

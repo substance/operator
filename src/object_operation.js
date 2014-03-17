@@ -247,7 +247,7 @@ ObjectOperation.Object.Prototype = function() {
   };
 
   // Note: in the default implementation we do not need the diff
-  this.update = function(path, value, diff) {
+  this.update = function(path, value /*, diff*/) {
     this.set(path, value);
   };
 
