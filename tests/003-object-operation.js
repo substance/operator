@@ -81,7 +81,7 @@ ObjectOperationTest.Prototype = function() {
       var op = ObjectOperation.Delete(path, val);
 
       var obj = { a: { c: "bla"} };
-      assert.exception(errors.ChronicleError, function() {
+      assert.exception(errors.OperationError, function() {
         op.apply(obj);
       });
     },
@@ -120,7 +120,7 @@ ObjectOperationTest.Prototype = function() {
 
       assert.isTrue(ObjectOperation.hasConflict(a, b));
 
-      assert.exception(errors.ChronicleError, function() {
+      assert.exception(errors.OperationError, function() {
         ObjectOperation.transform(a, b);
       });
     },
@@ -187,7 +187,7 @@ ObjectOperationTest.Prototype = function() {
       var b = ObjectOperation.Update(path, TextOperation.fromOT("foo", [-3, "bar"]));
 
       assert.isTrue(ObjectOperation.hasConflict(a, b));
-      assert.exception(errors.ChronicleError, function() {
+      assert.exception(errors.OperationError, function() {
         ObjectOperation.transform(a, b);
       });
     },
@@ -252,7 +252,7 @@ ObjectOperationTest.Prototype = function() {
 
       assert.isTrue(ObjectOperation.hasConflict(a, b));
 
-      assert.exception(errors.ChronicleError, function() {
+      assert.exception(errors.OperationError, function() {
         ObjectOperation.transform(a,b);
       });
     },
