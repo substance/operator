@@ -40,6 +40,8 @@ var ObjectOperation = function(data) {
     this.val = data.val;
     this.original = data.original;
   }
+
+  this.data = data.data;
 };
 
 ObjectOperation.fromJSON = function(data) {
@@ -187,6 +189,7 @@ ObjectOperation.Prototype = function() {
     var data = {
       type: this.type,
       path: this.path,
+      data: this.data
     };
 
     if (this.type === CREATE || this.type === DELETE) {
