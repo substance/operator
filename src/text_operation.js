@@ -81,7 +81,7 @@ TextOperation.Prototype = function() {
     return this.type === DEL;
   };
 
-  this.length = function() {
+  this.getLength = function() {
     return this.str.length;
   };
 
@@ -241,7 +241,7 @@ function transform_insert_delete(a, b) {
 
   // Note: this is a conflict case the user should be noticed about
   // If applied still, the deletion takes precedence
-  // a.pos > b.pos && <= b.pos + b.length()
+  // a.pos > b.pos && <= b.pos + b.length
   else {
     var s = a.pos - b.pos;
     b.str = b.str.slice(0, s) + a.str + b.str.slice(s);
