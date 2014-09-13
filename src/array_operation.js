@@ -486,8 +486,15 @@ ArrayOperation.Insert = function(pos, val) {
 // When pos is given, element at that position gets removed
 
 ArrayOperation.Delete = function(arr, pos) {
+  var val;
   if (pos < 0) return new ArrayOperation({type: NOP});
-  return new ArrayOperation({type:DEL, pos: pos, val: arr[pos]});
+  if (_.isNumber(arr)) {
+    val = pos;
+    pos = arr;
+  } else {
+    val = arr[pos];
+  }
+  return new ArrayOperation({ type:DEL, pos: pos, val: val });
 };
 
 ArrayOperation.Move = function(pos1, pos2) {
@@ -502,7 +509,7 @@ ArrayOperation.Push = function(arr, val) {
 ArrayOperation.Pop = function(arr) {
   // First we need to find a way to return values
   var index = arr.length-1;
-  return ArrayOperation.Delete(index, arr[index]);
+  return ArrayOperation.Delete(arr, index);
 };
 
 
@@ -554,8 +561,8 @@ ArrayOperation.Compound = function(ops, data) {
 
 ArrayOperation.Clear = function(arr) {
   var ops = [];
-  for (var idx = 0; idx < arr.length; idx++) {
-    ops.push(ArrayOperation.Delete(0, arr[idx]));
+  for (var idx = arr.length - 1; idx >= 0; idx--) {
+    ops.push(ArrayOperation.Delete(arr, idx));
   }
   return ArrayOperation.Compound(ops);
 };
@@ -612,8 +619,7 @@ ArrayOperation.create = function(array, spec) {
     return ArrayOperation.Insert(pos, val);
   } else if (type === DEL || type === "-") {
     pos = spec[1];
-    val = array[pos];
-    return ArrayOperation.Delete(pos, val);
+    return ArrayOperation.Delete(array, pos);
   } else if (type === MOV || type === ">>") {
     pos = spec[1];
     var target = spec[2];

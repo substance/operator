@@ -100,7 +100,7 @@ ArrayOperationTest.Prototype = function() {
     "Transformation: a=Insert, b=Delete (1), a < b", function() {
       var input = [1,3,4,5];
       var expected = [1,2,3,5];
-      var a = ArrayOperation.Insert(input, 1);
+      var a = ArrayOperation.Insert(1, 2);
       var b = ArrayOperation.Delete(input, 2);
 
       testTransform(a, b, input, expected);
@@ -232,7 +232,7 @@ ArrayOperationTest.Prototype = function() {
       var input = [1,2,3,4,5];
       var expected = [1,2,4,5];
 
-      var op = ArrayOperation.Delete(input, 3);
+      var op = ArrayOperation.Delete(input, 2);
       var output = op.apply(input);
 
       assert.isArrayEqual(expected, output);
