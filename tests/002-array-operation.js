@@ -70,8 +70,8 @@ ArrayOperationTest.Prototype = function() {
     "Transformation: a=Delete, b=Delete (1,2), a < b and b < a", function() {
       var input = [1,2,3,4,5];
       var expected = [1,3,5];
-      var a = ArrayOperation.Delete(1, 2);
-      var b = ArrayOperation.Delete(3, 4);
+      var a = ArrayOperation.Delete(input, 1);
+      var b = ArrayOperation.Delete(input, 3);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
@@ -80,8 +80,8 @@ ArrayOperationTest.Prototype = function() {
     "Transformation: a=Delete, b=Delete (3), a == b", function() {
       var input = [1,2,3];
       var expected = [1,3];
-      var a = ArrayOperation.Delete(1, 2);
-      var b = ArrayOperation.Delete(1, 2);
+      var a = ArrayOperation.Delete(input, 1);
+      var b = ArrayOperation.Delete(input, 1);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
@@ -100,8 +100,8 @@ ArrayOperationTest.Prototype = function() {
     "Transformation: a=Insert, b=Delete (1), a < b", function() {
       var input = [1,3,4,5];
       var expected = [1,2,3,5];
-      var a = ArrayOperation.Insert(1, 2);
-      var b = ArrayOperation.Delete(2, 4);
+      var a = ArrayOperation.Insert(input, 1);
+      var b = ArrayOperation.Delete(input, 2);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
@@ -114,7 +114,7 @@ ArrayOperationTest.Prototype = function() {
       var input = [1,2,3,5];
       var expected = [1,3,4,5];
       var a = ArrayOperation.Insert(3, 4);
-      var b = ArrayOperation.Delete(1, 2);
+      var b = ArrayOperation.Delete(input, 1);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
@@ -127,7 +127,7 @@ ArrayOperationTest.Prototype = function() {
       var input = [1,2,3];
       var expected = [1,4,3];
       var a = ArrayOperation.Insert(1, 4);
-      var b = ArrayOperation.Delete(1, 2);
+      var b = ArrayOperation.Delete(input, 1);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
@@ -159,7 +159,7 @@ ArrayOperationTest.Prototype = function() {
       var input = [1,2,3,4];
       var expected = [1,2,4];
       var a = ArrayOperation.Move(2, 0);
-      var b = ArrayOperation.Delete(2, 3);
+      var b = ArrayOperation.Delete(input, 2);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);

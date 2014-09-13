@@ -485,13 +485,9 @@ ArrayOperation.Insert = function(pos, val) {
 // When array is provided value is looked up
 // When pos is given, element at that position gets removed
 
-ArrayOperation.Delete = function(posOrArray, val) {
-  var pos = posOrArray;
-  if (_.isArray(pos)) {
-    pos = pos.indexOf(val);
-  }
+ArrayOperation.Delete = function(arr, pos) {
   if (pos < 0) return new ArrayOperation({type: NOP});
-  return new ArrayOperation({type:DEL, pos: pos, val: val});
+  return new ArrayOperation({type:DEL, pos: pos, val: arr[pos]});
 };
 
 ArrayOperation.Move = function(pos1, pos2) {
