@@ -9,11 +9,11 @@
     "url": "https://github.com/substance/operator.git"
   },
   "dependencies": {
-    "underscore": "",
     "substance-util": ""
   },
   "devDependencies": {
     "mocha": "",
+    "underscore": "",
     "substance-test": ""
   },
   "scripts": {
