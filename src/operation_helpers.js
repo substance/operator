@@ -1,5 +1,6 @@
 "use strict";
 
+var _ = require('underscore');
 var TextOperation = require("./text_operation");
 var ArrayOperation = require("./array_operation");
 
@@ -58,12 +59,15 @@ Helpers.invert = function(op, type) {
 
 // Flattens a list of ops, i.e., extracting any ops from compounds
 Helpers.flatten = function(op) {
-  if (op.type !== "compound") {
-    return [op];
+  var ops;
+  if (_.isArray(op)) {
+    ops = op;
+  } else if (op.type !== "compound") {
+    ops = [op];
+  } else {
+    ops = op.ops.slice(0);
   }
-
   var flat = [];
-  var ops = op.ops.slice(0);
   while(ops.length > 0) {
     op = ops.shift();
     if (op.type !== "compound") {
