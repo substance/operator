@@ -9,7 +9,6 @@ var errors = util.errors;
 var Operation = require('./operation');
 var Compound = require('./compound');
 
-
 var INS = "+";
 var DEL = "-";
 
@@ -88,9 +87,7 @@ TextOperation.Prototype = function() {
 
   this.apply = function(str) {
     if (this.isEmpty()) return str;
-
     var adapter = (str instanceof TextOperation.StringAdapter) ? str : new TextOperation.StringAdapter(str);
-
     if (this.type === INS) {
       adapter.insert(this.pos, this.str);
     }
@@ -100,7 +97,6 @@ TextOperation.Prototype = function() {
     else {
       throw new errors.OperationError("Illegal operation type: " + this.type);
     }
-
     return adapter.get();
   };
 
@@ -134,33 +130,26 @@ TextOperation.Prototype.prototype = Operation.prototype;
 TextOperation.prototype = new TextOperation.Prototype();
 
 var hasConflict = function(a, b) {
-
   // Insert vs Insert:
   //
   // Insertions are conflicting iff their insert position is the same.
-
   if (a.type === INS && b.type === INS)  return (a.pos === b.pos);
-
   // Delete vs Delete:
   //
   // Deletions are conflicting if their ranges overlap.
-
   if (a.type === DEL && b.type === DEL) {
     // to have no conflict, either `a` should be after `b` or `b` after `a`, otherwise.
     return !(a.pos >= b.pos + b.str.length || b.pos >= a.pos + a.str.length);
   }
-
   // Delete vs Insert:
   //
   // A deletion and an insertion are conflicting if the insert position is within the deleted range.
-
   var del, ins;
   if (a.type === DEL) {
     del = a; ins = b;
   } else {
     del = b; ins = a;
   }
-
   return (ins.pos >= del.pos && ins.pos < del.pos + del.str.length);
 };
 
@@ -168,7 +157,6 @@ var hasConflict = function(a, b) {
 // --------
 
 function transform_insert_insert(a, b, first) {
-
   if (a.pos === b.pos) {
     if (first) {
       b.pos += a.str.length;
@@ -176,15 +164,12 @@ function transform_insert_insert(a, b, first) {
       a.pos += b.str.length;
     }
   }
-
   else if (a.pos < b.pos) {
     b.pos += a.str.length;
   }
-
   else {
     a.pos += b.str.length;
   }
-
 }
 
 // Transform two Deletions
@@ -192,30 +177,24 @@ function transform_insert_insert(a, b, first) {
 //
 
 function transform_delete_delete(a, b, first) {
-
   // reduce to a normalized case
   if (a.pos > b.pos) {
     return transform_delete_delete(b, a, !first);
   }
-
   if (a.pos === b.pos && a.str.length > b.str.length) {
     return transform_delete_delete(b, a, !first);
   }
-
-
   // take out overlapping parts
   if (b.pos < a.pos + a.str.length) {
     var s = b.pos - a.pos;
     var s1 = a.str.length - s;
     var s2 = s + b.str.length;
-
     a.str = a.str.slice(0, s) + a.str.slice(s2);
     b.str = b.str.slice(s1);
     b.pos -= s;
   } else {
     b.pos -= a.str.length;
   }
-
 }
 
 // Transform Insert and Deletion
@@ -223,23 +202,18 @@ function transform_delete_delete(a, b, first) {
 //
 
 function transform_insert_delete(a, b) {
-
   if (a.type === DEL) {
     return transform_insert_delete(b, a);
   }
-
   // we can assume, that a is an insertion and b is a deletion
-
   // a is before b
   if (a.pos <= b.pos) {
     b.pos += a.str.length;
   }
-
   // a is after b
   else if (a.pos >= b.pos + b.str.length) {
     a.pos -= b.str.length;
   }
-
   // Note: this is a conflict case the user should be noticed about
   // If applied still, the deletion takes precedence
   // a.pos > b.pos && <= b.pos + b.length
@@ -248,22 +222,17 @@ function transform_insert_delete(a, b) {
     b.str = b.str.slice(0, s) + a.str + b.str.slice(s);
     a.str = "";
   }
-
 }
 
 var transform0 = function(a, b, options) {
-
   options = options || {};
-
   if (options.check && hasConflict(a, b)) {
     throw Operation.conflict(a, b);
   }
-
   if (!options.inplace) {
     a = util.clone(a);
     b = util.clone(b);
   }
-
   if (a.type === INS && b.type === INS)  {
     transform_insert_insert(a, b, true);
   }
@@ -273,7 +242,6 @@ var transform0 = function(a, b, options) {
   else {
     transform_insert_delete(a,b);
   }
-
   return [a, b];
 };
 
@@ -304,7 +272,6 @@ StringAdapter.prototype = {
       this.str = this.str.slice(0, pos).concat(str).concat(this.str.slice(pos));
     }
   },
-
   delete: function(pos, length) {
     if (this.str.length < pos + length) {
       throw new errors.OperationError("Provided string is too short.");
@@ -315,7 +282,6 @@ StringAdapter.prototype = {
       this.str = this.str.slice(0, pos).concat(this.str.slice(pos + length));
     }
   },
-
   get: function() {
     return this.str;
   }
@@ -342,18 +308,14 @@ TextOperation.Compound = function(ops, data) {
 // 3. string: insert the given string at the current position
 
 TextOperation.fromOT = function(str, ops) {
-
   var atomicOps = []; // atomic ops
-
   // iterating through the sequence and bookkeeping the position
   // in the source and destination str
   var srcPos = 0,
       dstPos = 0;
-
   if (!_.isArray(ops)) {
     ops = _.toArray(arguments).slice(1);
   }
-
   _.each(ops, function(op) {
     if (_.isString(op)) { // insert chars
       atomicOps.push(TextOperation.Insert(dstPos, op));
@@ -367,11 +329,9 @@ TextOperation.fromOT = function(str, ops) {
       dstPos += op;
     }
   });
-
   if (atomicOps.length === 0) {
     return null;
   }
-
   return TextOperation.Compound(atomicOps);
 };
 
@@ -394,9 +354,7 @@ var Range = function(range) {
 //
 
 var range_transform = function(range, textOp, expandLeft, expandRight) {
-
   var changed = false;
-
   // handle compound operations
   if (textOp.type === Compound.TYPE) {
     for (var idx = 0; idx < textOp.ops.length; idx++) {
@@ -405,10 +363,7 @@ var range_transform = function(range, textOp, expandLeft, expandRight) {
     }
     return;
   }
-
-
   var start, end;
-
   if (_.isArray(range)) {
     start = range[0];
     end = range[1];
@@ -416,12 +371,10 @@ var range_transform = function(range, textOp, expandLeft, expandRight) {
     start = range.start;
     end = start + range.length;
   }
-
   // Delete
   if (textOp.type === DEL) {
     var pos1 = textOp.pos;
     var pos2 = textOp.pos+textOp.str.length;
-
     if (pos1 <= start) {
       start -= Math.min(pos2-pos1, start-pos1);
       changed = true;
@@ -430,24 +383,20 @@ var range_transform = function(range, textOp, expandLeft, expandRight) {
       end -= Math.min(pos2-pos1, end-pos1);
       changed = true;
     }
-
   } else if (textOp.type === INS) {
     var pos = textOp.pos;
     var l = textOp.str.length;
-
     if ( (pos < start) ||
          (pos === start && !expandLeft) ) {
       start += l;
       changed = true;
     }
-
     if ( (pos < end) ||
          (pos === end && expandRight) ) {
       end += l;
       changed = true;
     }
   }
-
   if (changed) {
     if (_.isArray(range)) {
       range[0] = start;
@@ -457,7 +406,6 @@ var range_transform = function(range, textOp, expandLeft, expandRight) {
       range.length = end - start;
     }
   }
-
   return changed;
 };
 
