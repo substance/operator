@@ -3,6 +3,7 @@
 // Import
 // ========
 
+var _ = require('underscore');
 var util = require('substance-util');
 var errors = util.errors;
 var Operation = require('./operation');
@@ -40,9 +41,10 @@ var TextOperation = function(options) {
   if(!this.isInsert() && !this.isDelete()) {
     throw new errors.OperationError("Illegal type.");
   }
-  if (!_.isString(this.str)) {
-    throw new errors.OperationError("Illegal argument: expecting string.");
-  }
+  // Note: also support custom string implementations
+  // if (!_.isString(this.str)) {
+  //   throw new errors.OperationError("Illegal argument: expecting string.");
+  // }
   if (!_.isNumber(this.pos) && this.pos < 0) {
     throw new errors.OperationError("Illegal argument: expecting positive number as pos.");
   }
@@ -296,14 +298,22 @@ StringAdapter.prototype = {
     if (this.str.length < pos) {
       throw new errors.OperationError("Provided string is too short.");
     }
-    this.str = this.str.slice(0, pos) + str + this.str.slice(pos);
+    if (this.str.splice) {
+      this.str.splice(pos, 0, str);
+    } else {
+      this.str = this.str.slice(0, pos).concat(str).concat(this.str.slice(pos));
+    }
   },
 
   delete: function(pos, length) {
     if (this.str.length < pos + length) {
       throw new errors.OperationError("Provided string is too short.");
     }
-    this.str = this.str.slice(0, pos) + this.str.slice(pos + length);
+    if (this.str.splice) {
+      this.str.splice(pos, length);
+    } else {
+      this.str = this.str.slice(0, pos).concat(this.str.slice(pos + length));
+    }
   },
 
   get: function() {
