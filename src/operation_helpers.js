@@ -57,11 +57,15 @@ Helpers.invert = function(op, type) {
 };
 
 // Flattens a list of ops, i.e., extracting any ops from compounds
-Helpers.flatten = function(ops) {
+Helpers.flatten = function(op) {
+  if (op.type !== "compound") {
+    return [op];
+  }
+
   var flat = [];
-  ops = ops.slice(0);
+  var ops = op.ops.slice(0);
   while(ops.length > 0) {
-    var op = ops.shift();
+    op = ops.shift();
     if (op.type !== "compound") {
       flat.push(op);
     } else {
