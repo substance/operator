@@ -79,4 +79,42 @@ Helpers.flatten = function(op) {
   return flat;
 };
 
+Helpers.cotransform = function(graph, adapter, op) {
+  if (op.type === "create") {
+    adapter.create.call(adapter, op.val);
+  }
+  else if (op.type === "delete") {
+    adapter.delete.call(adapter, op.val);
+  }
+  // type = 'update' or 'set'
+  else {
+    var prop = graph.resolve(op.path);
+    if (prop === undefined) {
+      throw new Error("Key error: could not find element for path " + JSON.stringify(op.path));
+    }
+    var value = prop.get();
+
+    var oldValue;
+
+    // Attention: this happens when updates and deletions are within one compound
+    // The operation gets applied, finally the node is deleted.
+    // Listeners are triggered afterwards, so they can not rely on the node being there
+    // anymore.
+    // However, this is not a problem. We can ignore this update as there will come
+    // a deletion anyways.
+    if (value === undefined) {
+      return;
+    }
+
+    if (op.type === "set") {
+      oldValue = op.original;
+    } else {
+      var invertedDiff = Helpers.invert(op.diff, prop.baseType);
+      oldValue = invertedDiff.apply(_.clone(value));
+    }
+
+    adapter.update.call(adapter, prop.node, prop.key, value, oldValue);
+  }
+};
+
 module.exports = Helpers;
