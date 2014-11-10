@@ -113,7 +113,7 @@ Helpers.cotransform = function(graph, adapter, op) {
       oldValue = invertedDiff.apply(_.clone(value));
     }
 
-    adapter.update.call(adapter, prop.node, prop.key, value, oldValue);
+    adapter.update.call(adapter, prop.context, prop.key, value, oldValue);
   }
 };
 
