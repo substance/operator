@@ -645,7 +645,7 @@ ArrayAdapter.prototype = {
     if (this.array.length < pos) {
       throw new errors.OperationError("Provided array is too small.");
     }
-    if (this.array[pos] !== val) {
+    if (!_.isEqual(this.array[pos],val)) {
       throw new errors.OperationError("Unexpected value at position " + pos + ". Expected " + val + ", found " + this.array[pos]);
     }
     this.array.splice(pos, 1);
