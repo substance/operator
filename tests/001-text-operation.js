@@ -2,10 +2,9 @@
 
 var Test = require('substance-test');
 var assert = Test.assert;
-var TextOperation = require("../index").TextOperation;
+var TextOperation = require("../src/text_operation");
 
 function testTransform(a, b, input, expected) {
-
   var t = TextOperation.transform(a, b);
 
   var s = t[1].apply(a.apply(input));
@@ -13,7 +12,6 @@ function testTransform(a, b, input, expected) {
 
   s = t[0].apply(b.apply(input));
   assert.isEqual(expected, s);
-
 }
 
 var TextOperationTest = function() {
@@ -111,17 +109,6 @@ TextOperationTest.Prototype = function() {
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
-    },
-
-    "Compound: 'bla' - 'blapp' | 'blupp'", function() {
-      var input = "bla";
-      var expected1 = "blappupp";
-      var expected2 = "bluppapp";
-      var a = TextOperation.fromOT("bla", [2, -1, "app"]);
-      var b = TextOperation.fromOT("bla", [2, -1, "upp"]);
-
-      testTransform(a, b, input, expected1);
-      testTransform(b, a, input, expected2);
     },
 
   ];

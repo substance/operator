@@ -1,21 +1,15 @@
 "use strict";
 
-// Import
-// ========
-
-var _ = require('underscore');
-var util = require('substance-util');
-var errors = util.errors;
-var Operation = require('./operation');
-var Compound = require('./compound');
+var Substance = require('substance');
+var Conflict = require('./conflict');
 
 var INS = "+";
 var DEL = "-";
 
-var TextOperation = function(options) {
+function TextOperation(options) {
 
   // if this operation should be created using an array
-  if (_.isArray(options)) {
+  if (Substance.isArray(options)) {
     options = {
       type: options[0],
       pos: options[1],
@@ -24,7 +18,7 @@ var TextOperation = function(options) {
   }
 
   if (options.type === undefined || options.pos === undefined || options.str === undefined) {
-    throw new errors.OperationError("Illegal argument: insufficient data.");
+    throw new Error("Illegal argument: insufficient data.");
   }
 
   // '+' or '-'
@@ -38,29 +32,18 @@ var TextOperation = function(options) {
 
   // sanity checks
   if(!this.isInsert() && !this.isDelete()) {
-    throw new errors.OperationError("Illegal type.");
+    throw new Error("Illegal type.");
   }
-  // Note: also support custom string implementations
-  // if (!_.isString(this.str)) {
-  //   throw new errors.OperationError("Illegal argument: expecting string.");
-  // }
-  if (!_.isNumber(this.pos) && this.pos < 0) {
-    throw new errors.OperationError("Illegal argument: expecting positive number as pos.");
+  if (!Substance.isString(this.str)) {
+    throw new Error("Illegal argument: expecting string.");
   }
-};
+  if (!Substance.isNumber(this.pos) && this.pos < 0) {
+    throw new Error("Illegal argument: expecting positive number as pos.");
+  }
+}
 
 TextOperation.fromJSON = function(data) {
-
-  if (data.type === Compound.TYPE) {
-    var ops = [];
-    for (var idx = 0; idx < data.ops.length; idx++) {
-      ops.push(TextOperation.fromJSON(data.ops[idx]));
-    }
-    return TextOperation.Compound(ops,data.data);
-
-  } else {
-    return new TextOperation(data);
-  }
+  return new TextOperation(data);
 };
 
 TextOperation.Prototype = function() {
@@ -95,7 +78,7 @@ TextOperation.Prototype = function() {
       adapter.delete(this.pos, this.str.length);
     }
     else {
-      throw new errors.OperationError("Illegal operation type: " + this.type);
+      throw new Error("Illegal operation type: " + this.type);
     }
     return adapter.get();
   };
@@ -126,8 +109,8 @@ TextOperation.Prototype = function() {
   };
 
 };
-TextOperation.Prototype.prototype = Operation.prototype;
-TextOperation.prototype = new TextOperation.Prototype();
+
+Substance.initClass(TextOperation);
 
 var hasConflict = function(a, b) {
   // Insert vs Insert:
@@ -224,14 +207,14 @@ function transform_insert_delete(a, b) {
   }
 }
 
-var transform0 = function(a, b, options) {
+var transform = function(a, b, options) {
   options = options || {};
   if (options.check && hasConflict(a, b)) {
-    throw Operation.conflict(a, b);
+    throw new Conflict(a, b);
   }
   if (!options.inplace) {
-    a = util.clone(a);
-    b = util.clone(b);
+    a = Substance.clone(a);
+    b = Substance.clone(b);
   }
   if (a.type === INS && b.type === INS)  {
     transform_insert_insert(a, b, true);
@@ -246,7 +229,7 @@ var transform0 = function(a, b, options) {
 };
 
 var __apply__ = function(op, array) {
-  if (_.isArray(op)) {
+  if (Substance.isArray(op)) {
     op = new TextOperation(op);
   }
   else if (!(op instanceof TextOperation)) {
@@ -255,7 +238,10 @@ var __apply__ = function(op, array) {
   return op.apply(array);
 };
 
-TextOperation.transform = Compound.createTransform(transform0);
+TextOperation.transform = function() {
+  return transform.apply(null, arguments);
+};
+
 TextOperation.apply = __apply__;
 
 var StringAdapter = function(str) {
@@ -264,7 +250,7 @@ var StringAdapter = function(str) {
 StringAdapter.prototype = {
   insert: function(pos, str) {
     if (this.str.length < pos) {
-      throw new errors.OperationError("Provided string is too short.");
+      throw new Error("Provided string is too short.");
     }
     if (this.str.splice) {
       this.str.splice(pos, 0, str);
@@ -274,7 +260,7 @@ StringAdapter.prototype = {
   },
   delete: function(pos, length) {
     if (this.str.length < pos + length) {
-      throw new errors.OperationError("Provided string is too short.");
+      throw new Error("Provided string is too short.");
     }
     if (this.str.splice) {
       this.str.splice(pos, length);
@@ -295,52 +281,10 @@ TextOperation.Delete = function(pos, str) {
   return new TextOperation(["-", pos, str]);
 };
 
-TextOperation.Compound = function(ops, data) {
-  // do not create a Compound if not necessary
-  if (ops.length === 1 && !data) return ops[0];
-  else return new Compound(ops, data);
-};
-
-// Converts from a given a sequence in the format of Tim's lib
-// which is an array of numbers and strings.
-// 1. positive number: retain a number of characters
-// 2. negative number: delete a string with the given length at the current position
-// 3. string: insert the given string at the current position
-
-TextOperation.fromOT = function(str, ops) {
-  var atomicOps = []; // atomic ops
-  // iterating through the sequence and bookkeeping the position
-  // in the source and destination str
-  var srcPos = 0,
-      dstPos = 0;
-  if (!_.isArray(ops)) {
-    ops = _.toArray(arguments).slice(1);
-  }
-  _.each(ops, function(op) {
-    if (_.isString(op)) { // insert chars
-      atomicOps.push(TextOperation.Insert(dstPos, op));
-      dstPos += op.length;
-    } else if (op<0) { // delete n chars
-      var n = -op;
-      atomicOps.push(TextOperation.Delete(dstPos, str.slice(srcPos, srcPos+n)));
-      srcPos += n;
-    } else { // skip n chars
-      srcPos += op;
-      dstPos += op;
-    }
-  });
-  if (atomicOps.length === 0) {
-    return null;
-  }
-  return TextOperation.Compound(atomicOps);
-};
-
-TextOperation.fromSequence = TextOperation.fromOT;
-
 // A helper class to model Text selections and to provide an easy way
 // to bookkeep changes by other applied TextOperations
 var Range = function(range) {
-  if (_.isArray(range)) {
+  if (Substance.isArray(range)) {
     this.start = range[0];
     this.length = range[1];
   } else {
@@ -355,16 +299,9 @@ var Range = function(range) {
 
 var range_transform = function(range, textOp, expandLeft, expandRight) {
   var changed = false;
-  // handle compound operations
-  if (textOp.type === Compound.TYPE) {
-    for (var idx = 0; idx < textOp.ops.length; idx++) {
-      var op = textOp.ops[idx];
-      range_transform(range, op);
-    }
-    return;
-  }
   var start, end;
-  if (_.isArray(range)) {
+
+  if (Substance.isArray(range)) {
     start = range[0];
     end = range[1];
   } else {
@@ -398,7 +335,7 @@ var range_transform = function(range, textOp, expandLeft, expandRight) {
     }
   }
   if (changed) {
-    if (_.isArray(range)) {
+    if (Substance.isArray(range)) {
       range[0] = start;
       range[1] = end;
     } else {
@@ -443,8 +380,5 @@ TextOperation.StringAdapter = StringAdapter;
 TextOperation.Range = Range;
 TextOperation.INSERT = INS;
 TextOperation.DELETE = DEL;
-
-// Export
-// ========
 
 module.exports = TextOperation;

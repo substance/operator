@@ -1,15 +1,9 @@
 "use strict";
 
-// Import
-// ========
-
-var _ = require('underscore');
-var util = require('substance-util');
-var errors = util.errors;
-var Operation = require('./operation');
-var Compound = require('./compound');
+var Substance = require('substance');
 var TextOperation = require('./text_operation');
 var ArrayOperation = require('./array_operation');
+var Conflict = require('./conflict');
 
 var NOP = "NOP";
 var CREATE = "create";
@@ -32,7 +26,7 @@ var ObjectOperation = function(data) {
       this.diff = data.diff;
       this.propertyType = data.propertyType;
     } else {
-      throw new errors.OperationError("Illegal argument: update by value or by diff must be provided");
+      throw new Error("Illegal argument: update by value or by diff must be provided");
     }
   }
 
@@ -45,29 +39,20 @@ var ObjectOperation = function(data) {
 };
 
 ObjectOperation.fromJSON = function(data) {
-  if (data.type === Compound.TYPE) {
-    var ops = [];
-    for (var idx = 0; idx < data.ops.length; idx++) {
-      ops.push(ObjectOperation.fromJSON(data.ops[idx]));
+  var op = new ObjectOperation(data);
+  if (data.type === "update") {
+    switch (data.propertyType) {
+    case "string":
+      op.diff = TextOperation.fromJSON(op.diff);
+      break;
+    case "array":
+      op.diff = ArrayOperation.fromJSON(op.diff);
+      break;
+    default:
+      throw new Error("Don't know how to deserialize this operation:" + JSON.stringify(data));
     }
-    return ObjectOperation.Compound(ops, data.data);
-
-  } else {
-    var op = new ObjectOperation(data);
-    if (data.type === "update") {
-      switch (data.propertyType) {
-      case "string":
-        op.diff = TextOperation.fromJSON(op.diff);
-        break;
-      case "array":
-        op.diff = ArrayOperation.fromJSON(op.diff);
-        break;
-      default:
-        throw new Error("Don't know how to deserialize this operation:" + JSON.stringify(data));
-      }
-    }
-    return op;
   }
+  return op;
 };
 
 ObjectOperation.Prototype = function() {
@@ -90,7 +75,7 @@ ObjectOperation.Prototype = function() {
 
     if (this.type === CREATE) {
       // clone here as the operations value must not be changed
-      adapter.create(this.path, util.clone(this.val));
+      adapter.create(this.path, Substance.clone(this.val));
       return obj;
     }
 
@@ -99,7 +84,7 @@ ObjectOperation.Prototype = function() {
     if (this.type === DELETE) {
       // TODO: maybe we could tolerate such deletes
       if (val === undefined) {
-        throw new errors.OperationError("Property " + JSON.stringify(this.path) + " not found.");
+        throw new Error("Property " + JSON.stringify(this.path) + " not found.");
       }
       adapter.delete(this.path, val);
     }
@@ -118,17 +103,17 @@ ObjectOperation.Prototype = function() {
         adapter.update(this.path, val, this.diff);
       }
       else {
-        throw new errors.OperationError("Unsupported type for operational update.");
+        throw new Error("Unsupported type for operational update.");
       }
     }
 
     else if (this.type === SET) {
       // clone here as the operations value must not be changed
-      adapter.set(this.path, util.clone(this.val));
+      adapter.set(this.path, Substance.clone(this.val));
     }
 
     else {
-      throw new errors.OperationError("Illegal state.");
+      throw new Error("Illegal state.");
     }
 
     return obj;
@@ -168,7 +153,7 @@ ObjectOperation.Prototype = function() {
     }
 
     else {
-      throw new errors.OperationError("Illegal state.");
+      throw new Error("Illegal state.");
     }
 
     return result;
@@ -181,9 +166,7 @@ ObjectOperation.Prototype = function() {
   this.toJSON = function() {
 
     if (this.type === NOP) {
-      return {
-        type: NOP
-      };
+      return { type: NOP };
     }
 
     var data = {
@@ -210,8 +193,8 @@ ObjectOperation.Prototype = function() {
   };
 
 };
-ObjectOperation.Prototype.prototype = Operation.prototype;
-ObjectOperation.prototype = new ObjectOperation.Prototype();
+
+Substance.initClass(ObjectOperation);
 
 ObjectOperation.Object = function(obj) {
   this.obj = obj;
@@ -244,13 +227,13 @@ ObjectOperation.Object.Prototype = function() {
   this.create = function(path, value) {
     var item = resolve(this, this.obj, path, true);
     if (item.parent[item.key] !== undefined) {
-      throw new errors.OperationError("Value already exists. path =" + JSON.stringify(path));
+      throw new Error("Value already exists. path =" + JSON.stringify(path));
     }
     item.parent[item.key] = value;
   };
 
   // Note: in the default implementation we do not need the diff
-  this.update = function(path, value /*, diff*/) {
+  this.update = function(path, value) {
     this.set(path, value);
   };
 
@@ -275,7 +258,7 @@ ObjectOperation.Object.prototype = new ObjectOperation.Object.Prototype();
 var hasConflict = function(a, b) {
   if (a.type === NOP || b.type === NOP) return false;
 
-  return _.isEqual(a.path, b.path);
+  return Substance.isEqual(a.path, b.path);
 };
 
 var transform_delete_delete = function(a, b) {
@@ -288,7 +271,7 @@ var transform_delete_delete = function(a, b) {
 var transform_create_create = function() {
   // TODO: maybe it would be possible to create an differntial update that transforms the one into the other
   // However, we fail for now.
-  throw new errors.OperationError("Can not transform two concurring creates of the same property");
+  throw new Error("Can not transform two concurring creates of the same property");
 };
 
 var transform_delete_create = function(a, b, flipped) {
@@ -332,7 +315,7 @@ var transform_delete_update = function(a, b, flipped) {
 
 var transform_create_update = function() {
   // it is not possible to reasonably transform this.
-  throw new errors.OperationError("Can not transform a concurring create and update of the same property");
+  throw new Error("Can not transform a concurring create and update of the same property");
 };
 
 var transform_update_update = function(a, b) {
@@ -387,7 +370,7 @@ var transform_delete_set = function(a, b, flipped) {
 };
 
 var transform_update_set = function() {
-  throw new errors.OperationError("Can not transform update/set of the same property.");
+  throw new Error("Can not transform update/set of the same property.");
 };
 
 var transform_set_set = function(a, b) {
@@ -427,12 +410,12 @@ var transform = function(a, b, options) {
   var conflict = hasConflict(a, b);
 
   if (options.check && conflict) {
-    throw Operation.conflict(a, b);
+    throw new Conflict(a, b);
   }
 
   if (!options.inplace) {
-    a = util.clone(a);
-    b = util.clone(b);
+    a = Substance.clone(a);
+    b = Substance.clone(b);
   }
 
   // without conflict: a' = a, b' = b
@@ -445,7 +428,7 @@ var transform = function(a, b, options) {
   return [a, b];
 };
 
-ObjectOperation.transform = Compound.createTransform(transform);
+ObjectOperation.transform = transform;
 ObjectOperation.hasConflict = hasConflict;
 
 var __apply__ = function(op, obj) {
@@ -468,9 +451,6 @@ ObjectOperation.Delete = function(path, val) {
 
 function guessPropertyType(op) {
 
-  if (op instanceof Compound) {
-    return guessPropertyType(op.ops[0]);
-  }
   if (op instanceof TextOperation) {
     return "string";
   }
@@ -497,55 +477,9 @@ ObjectOperation.Set = function(path, oldVal, newVal) {
   return new ObjectOperation({
     type: SET,
     path: path,
-    val: util.clone(newVal),
-    original: util.clone(oldVal)
+    val: Substance.clone(newVal),
+    original: Substance.clone(oldVal)
   });
-};
-
-ObjectOperation.Compound = function(ops, data) {
-  if (ops.length === 0) return null;
-  else return new Compound(ops, data);
-};
-
-// TODO: this can not deal with cyclic references
-var __extend__ = function(obj, newVals, path, deletes, creates, updates) {
-  var keys = Object.getOwnPropertyNames(newVals);
-
-  for (var idx = 0; idx < keys.length; idx++) {
-    var key = keys[idx];
-    var p = path.concat(key);
-
-    if (newVals[key] === undefined && obj[key] !== undefined) {
-      deletes.push(ObjectOperation.Delete(p, obj[key]));
-
-    } else if (_.isObject(newVals[key])) {
-
-      // TODO: for now, the structure must be the same
-      if (!_.isObject(obj[key])) {
-        throw new errors.OperationError("Incompatible arguments: newVals must have same structure as obj.");
-      }
-      __extend__(obj[key], newVals[key], p, deletes, creates, updates);
-
-    } else {
-      if (obj[key] === undefined) {
-        creates.push(ObjectOperation.Create(p, newVals[key]));
-      } else {
-        var oldVal = obj[key];
-        var newVal = newVals[key];
-        if (!_.isEqual(oldVal, newVal)) {
-          updates.push(ObjectOperation.Set(p, oldVal, newVal));
-        }
-      }
-    }
-  }
-};
-
-ObjectOperation.Extend = function(obj, newVals) {
-  var deletes = [];
-  var creates = [];
-  var updates = [];
-  __extend__(obj, newVals, [], deletes, creates, updates);
-  return ObjectOperation.Compound(deletes.concat(creates).concat(updates));
 };
 
 ObjectOperation.NOP = NOP;
@@ -553,8 +487,5 @@ ObjectOperation.CREATE = CREATE;
 ObjectOperation.DELETE = DELETE;
 ObjectOperation.UPDATE = UPDATE;
 ObjectOperation.SET = SET;
-
-// Export
-// ========
 
 module.exports = ObjectOperation;

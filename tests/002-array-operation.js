@@ -13,7 +13,6 @@ function testTransform(a, b, input, expected) {
 
   output = ArrayOperation.perform(t[0], ArrayOperation.perform(b, input.slice(0)));
   assert.isArrayEqual(expected, output);
-
 }
 
 var ArrayOperationTest = function() {
@@ -67,11 +66,11 @@ ArrayOperationTest.Prototype = function() {
     //  3. `a == b`:  second operation should not have an effect;
     //                user should be noticed about conflict
 
-    "Transformation: a=Delete, b=Delete (1,2), a < b and b < a", function() {
+    "Transformation: a=Delete, b=Delete (1,2), a < b or b < a", function() {
       var input = [1,2,3,4,5];
       var expected = [1,3,5];
-      var a = ArrayOperation.Delete(input, 1);
-      var b = ArrayOperation.Delete(input, 3);
+      var a = ArrayOperation.Delete(1, 2);
+      var b = ArrayOperation.Delete(3, 4);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
@@ -80,8 +79,8 @@ ArrayOperationTest.Prototype = function() {
     "Transformation: a=Delete, b=Delete (3), a == b", function() {
       var input = [1,2,3];
       var expected = [1,3];
-      var a = ArrayOperation.Delete(input, 1);
-      var b = ArrayOperation.Delete(input, 1);
+      var a = ArrayOperation.Delete(1, 2);
+      var b = ArrayOperation.Delete(1, 2);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
@@ -101,7 +100,7 @@ ArrayOperationTest.Prototype = function() {
       var input = [1,3,4,5];
       var expected = [1,2,3,5];
       var a = ArrayOperation.Insert(1, 2);
-      var b = ArrayOperation.Delete(input, 2);
+      var b = ArrayOperation.Delete(2, 4);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
@@ -114,7 +113,7 @@ ArrayOperationTest.Prototype = function() {
       var input = [1,2,3,5];
       var expected = [1,3,4,5];
       var a = ArrayOperation.Insert(3, 4);
-      var b = ArrayOperation.Delete(input, 1);
+      var b = ArrayOperation.Delete(1, 2);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
@@ -127,132 +126,17 @@ ArrayOperationTest.Prototype = function() {
       var input = [1,2,3];
       var expected = [1,4,3];
       var a = ArrayOperation.Insert(1, 4);
-      var b = ArrayOperation.Delete(input, 1);
+      var b = ArrayOperation.Delete(1, 2);
 
       testTransform(a, b, input, expected);
       testTransform(b, a, input, expected);
-    },
-
-    "Transformation (conflict): a=Move, b=Insert, m.s > i && m.t == i", function() {
-      var input = [1,3,4,5];
-      var expected1 = [1,5,2,3,4];
-      var expected2 = [1,2,5,3,4];
-      var a = ArrayOperation.Move(3, 1);
-      var b = ArrayOperation.Insert(1, 2);
-
-      testTransform(a, b, input, expected1);
-      testTransform(b, a, input, expected2);
-    },
-
-    "Transformation (conflict): a=Move, b=Insert, m.s < i && m.t == i-1", function() {
-      var input = [1,2,3,5];
-      var expected1 = [1,3,2,4,5];
-      var expected2 = [1,3,4,2,5];
-      var a = ArrayOperation.Move(1, 2);
-      var b = ArrayOperation.Insert(3, 4);
-
-      testTransform(a, b, input, expected1);
-      testTransform(b, a, input, expected2);
-    },
-
-    "Transformation (conflict): a=Move, b=Delete, m.s == d", function() {
-      var input = [1,2,3,4];
-      var expected = [1,2,4];
-      var a = ArrayOperation.Move(2, 0);
-      var b = ArrayOperation.Delete(input, 2);
-
-      testTransform(a, b, input, expected);
-      testTransform(b, a, input, expected);
-    },
-
-    "Transformation (conflict): a=Move, b=Move, a.s == b.s", function() {
-      var input = [1,2,3,4];
-      var expected1 = [1,3,2,4];
-      var expected2 = [2,1,3,4];
-      var a = ArrayOperation.Move(1, 0);
-      var b = ArrayOperation.Move(1, 2);
-
-      testTransform(a, b, input, expected1);
-      testTransform(b, a, input, expected2);
-    },
-
-    "Transformation (conflict): a=Move, b=Move, a.s < b.t && a.t == b.t-1", function() {
-      var input = [1,2,3,4];
-      var expected1 = [2,1,4,3];
-      var expected2 = [2,4,1,3];
-      var a = ArrayOperation.Move(0, 1);
-      var b = ArrayOperation.Move(3, 2);
-
-      testTransform(a, b, input, expected1);
-      testTransform(b, a, input, expected2);
-    },
-
-    "Transformation (conflict): a=Move, b=Move, a.t == b.t", function() {
-      var input = [1,2,3,4];
-      var expected1 = [1,3,4,2];
-      var expected2 = [1,4,3,2];
-      var a = ArrayOperation.Move(2, 1);
-      var b = ArrayOperation.Move(3, 1);
-
-      testTransform(a, b, input, expected1);
-      testTransform(b, a, input, expected2);
-    },
-
-    "Update: [1,2,3,4,5] -> [2,1,3,4]", function() {
-      var input = [1,2,3,4,5];
-      var expected = [2,1,3,4];
-
-      var op = ArrayOperation.Update(input, expected);
-      var output = op.apply(input);
-
-      assert.isArrayEqual(expected, output);
-    },
-
-    "Update: [1,2,3,4,5] -> []", function() {
-      var input = [1,2,3,4,5];
-      var expected = [];
-
-      var op = ArrayOperation.Update(input, expected);
-      var output = op.apply(input);
-
-      assert.isArrayEqual(expected, output);
-    },
-
-    "Update: [1,2,3,4,5] -> [5,4,3,2,1]", function() {
-      var input = [1,2,3,4,5];
-      var expected = [5,4,3,2,1];
-
-      var op = ArrayOperation.Update(input, expected);
-      var output = op.apply(input);
-
-      assert.isArrayEqual(expected, output);
     },
 
     "Delete 3: [1,2,3,4,5] -> [1,2,4,5]", function() {
       var input = [1,2,3,4,5];
       var expected = [1,2,4,5];
 
-      var op = ArrayOperation.Delete(input, 2);
-      var output = op.apply(input);
-
-      assert.isArrayEqual(expected, output);
-    },
-
-    "Pop: [1,2,3,4,5] -> [1,2,3,4]", function() {
-      var input = [1,2,3,4,5];
-      var expected = [1,2,3,4];
-
-      var op = ArrayOperation.Pop(input);
-      var output = op.apply(input);
-
-      assert.isArrayEqual(expected, output);
-    },
-
-    "Push: [1,2,3,4] -> [1,2,3,4,6]", function() {
-      var input = [1,2,3,4];
-      var expected = [1,2,3,4,6];
-
-      var op = ArrayOperation.Push(input, 6);
+      var op = ArrayOperation.Delete(2, 3);
       var output = op.apply(input);
 
       assert.isArrayEqual(expected, output);

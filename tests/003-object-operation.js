@@ -1,21 +1,19 @@
 "use strict";
 
+var Substance = require('substance');
 var Test = require('substance-test');
 var assert = Test.assert;
-var util = require('substance-util');
-var errors = util.errors;
 var operator = require('../index');
 var ObjectOperation = operator.ObjectOperation;
 var TextOperation = operator.TextOperation;
-var ArrayOperation = operator.ArrayOperation;
 
 function testTransform(a, b, input, expected) {
   var t = ObjectOperation.transform(a, b);
 
-  var output = ObjectOperation.apply(t[1], ObjectOperation.apply(a, util.clone(input)));
+  var output = ObjectOperation.apply(t[1], ObjectOperation.apply(a, Substance.clone(input)));
   assert.isDeepEqual(expected, output);
 
-  output = ObjectOperation.apply(t[0], ObjectOperation.apply(b, util.clone(input)));
+  output = ObjectOperation.apply(t[0], ObjectOperation.apply(b, Substance.clone(input)));
   assert.isDeepEqual(expected, output);
 }
 
@@ -81,33 +79,35 @@ ObjectOperationTest.Prototype = function() {
       var op = ObjectOperation.Delete(path, val);
 
       var obj = { a: { c: "bla"} };
-      assert.exception(errors.OperationError, function() {
+      assert.exception(function() {
         op.apply(obj);
       });
     },
 
     "Apply: update (text)", function() {
       var path = ["a"];
-      var op = ObjectOperation.Update(path, TextOperation.fromOT("bla", [2, -1, "upp"]));
+      var op1 = ObjectOperation.Update(path, TextOperation.Delete(2, 'a'));
+      var op2 = ObjectOperation.Update(path, TextOperation.Insert(2, "upp"));
       var expected = {a: "blupp"};
 
       var obj = {a: "bla"};
-      op.apply(obj);
+      op1.apply(obj);
+      op2.apply(obj);
 
       assert.isDeepEqual(expected, obj);
     },
 
-    "Apply: update (array)", function() {
-      var path = ["a"];
-      var val = [1,2,3,4,5];
-      var op = ObjectOperation.Update(path, ArrayOperation.Sequence([2, ['-', 3], 2, ['+', 6]]));
-      var expected = {a: [1,2,4,5,6]};
+    // "Apply: update (array)", function() {
+    //   var path = ["a"];
+    //   var val = [1,2,3,4,5];
+    //   var op = ObjectOperation.Update(path, ArrayOperation.Sequence([2, ['-', 3], 2, ['+', 6]]));
+    //   var expected = {a: [1,2,4,5,6]};
 
-      var obj = {a: val.slice(0)};
-      op.apply(obj);
+    //   var obj = {a: val.slice(0)};
+    //   op.apply(obj);
 
-      assert.isDeepEqual(expected, obj);
-    },
+    //   assert.isDeepEqual(expected, obj);
+    // },
 
     // Conflict cases
     "Transformation: create/create (conflict)", function() {
@@ -120,7 +120,7 @@ ObjectOperationTest.Prototype = function() {
 
       assert.isTrue(ObjectOperation.hasConflict(a, b));
 
-      assert.exception(errors.OperationError, function() {
+      assert.exception(function() {
         ObjectOperation.transform(a, b);
       });
     },
@@ -169,10 +169,10 @@ ObjectOperationTest.Prototype = function() {
     "Transformation: delete/update (conflict)", function() {
       var path = ["a"];
       var a = ObjectOperation.Delete(path, "bla");
-      var b = ObjectOperation.Update(path, TextOperation.fromOT("bla", [2, -1, "upp"]));
+      var b = ObjectOperation.Update(path, TextOperation.Insert(3, "pp"));
 
       var input = {a : "bla"};
-      var expected1 = {a: "blupp"};
+      var expected1 = {a: "blapp"};
       var expected2 = {};
 
       assert.isTrue(ObjectOperation.hasConflict(a, b));
@@ -184,22 +184,22 @@ ObjectOperationTest.Prototype = function() {
     "Transformation: create/update (conflict)", function() {
       var path = ["a"];
       var a = ObjectOperation.Create(path, "bla");
-      var b = ObjectOperation.Update(path, TextOperation.fromOT("foo", [-3, "bar"]));
+      var b = ObjectOperation.Update(path, TextOperation.Delete(0, "foo"));
 
       assert.isTrue(ObjectOperation.hasConflict(a, b));
-      assert.exception(errors.OperationError, function() {
+      assert.exception(function() {
         ObjectOperation.transform(a, b);
       });
     },
 
     "Transformation: update/update (conflict)", function() {
       var path = ["a"];
-      var a = ObjectOperation.Update(path, TextOperation.fromOT("bla", [2, -1, "app"]));
-      var b = ObjectOperation.Update(path, TextOperation.fromOT("bla", [2, -1, "upp"]));
+      var a = ObjectOperation.Update(path, TextOperation.Insert(3 , "pp"));
+      var b = ObjectOperation.Update(path, TextOperation.Insert(3, "bb"));
 
       var input = {a : "bla"};
-      var expected1 = {a: "blappupp"};
-      var expected2 = {a: "bluppapp"};
+      var expected1 = {a: "blappbb"};
+      var expected2 = {a: "blabbpp"};
 
       assert.isTrue(ObjectOperation.hasConflict(a, b));
 
@@ -247,12 +247,12 @@ ObjectOperationTest.Prototype = function() {
 
     "Transformation: update/set (conflict)", function() {
       var path = ["a"];
-      var a = ObjectOperation.Update(path, TextOperation.fromOT("bla", [2, -1, "upp"]));
+      var a = ObjectOperation.Update(path, TextOperation.Insert(3, "pp"));
       var b = ObjectOperation.Set(path, "bla", "blupp");
 
       assert.isTrue(ObjectOperation.hasConflict(a, b));
 
-      assert.exception(errors.OperationError, function() {
+      assert.exception(function() {
         ObjectOperation.transform(a,b);
       });
     },
