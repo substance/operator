@@ -8,10 +8,10 @@ var ArrayOperation = operator.ArrayOperation;
 function testTransform(a, b, input, expected) {
   var t = ArrayOperation.transform(a, b);
 
-  var output = ArrayOperation.perform(t[1], ArrayOperation.perform(a, input.slice(0)));
+  var output = t[1].apply(a.apply(input.slice(0)));
   assert.isArrayEqual(expected, output);
 
-  output = ArrayOperation.perform(t[0], ArrayOperation.perform(b, input.slice(0)));
+  output = t[0].apply(b.apply(input.slice(0)));
   assert.isArrayEqual(expected, output);
 }
 

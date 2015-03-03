@@ -1,7 +1,9 @@
+'use strict';
+
 function Conflict(a, b) {
-  var conflict = new Error("Conflict: " + JSON.stringify(a) +" vs " + JSON.stringify(b));
-  conflict.a = a;
-  conflict.b = b;
+  Error.call(this, "Conflict: " + JSON.stringify(a) +" vs " + JSON.stringify(b));
+  this.a = a;
+  this.b = b;
 }
 Conflict.prototype = Error.prototype;
 

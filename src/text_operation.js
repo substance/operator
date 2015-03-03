@@ -6,30 +6,16 @@ var Conflict = require('./conflict');
 var INS = "+";
 var DEL = "-";
 
-function TextOperation(options) {
-
-  // if this operation should be created using an array
-  if (Substance.isArray(options)) {
-    options = {
-      type: options[0],
-      pos: options[1],
-      str: options[2]
-    };
-  }
-
-  if (options.type === undefined || options.pos === undefined || options.str === undefined) {
+function TextOperation(data) {
+  if (data.type === undefined || data.pos === undefined || data.str === undefined) {
     throw new Error("Illegal argument: insufficient data.");
   }
-
   // '+' or '-'
-  this.type = options.type;
-
+  this.type = data.type;
   // the position where to apply the operation
-  this.pos = options.pos;
-
+  this.pos = data.pos;
   // the string to delete or insert
-  this.str = options.str;
-
+  this.str = data.str;
   // sanity checks
   if(!this.isInsert() && !this.isDelete()) {
     throw new Error("Illegal type.");
@@ -47,6 +33,33 @@ TextOperation.fromJSON = function(data) {
 };
 
 TextOperation.Prototype = function() {
+
+  this.apply = function(str) {
+    if (this.isEmpty()) return str;
+    if (this.type === INS) {
+      if (str.length < this.pos) {
+        throw new Error("Provided string is too short.");
+      }
+      if (str.splice) {
+        return str.splice(this.pos, 0, this.str);
+      } else {
+        return str.slice(0, this.pos).concat(this.str).concat(str.slice(this.pos));
+      }
+    }
+    else if (this.type === DEL) {
+      if (str.length < this.pos + this.str.length) {
+        throw new errors.OperationError("Provided string is too short.");
+      }
+      if (str.splice) {
+        return str.splice(this.pos, this.str.length);
+      } else {
+        return str.slice(0, this.pos).concat(str.slice(this.pos + this.str.length));
+      }
+    }
+    else {
+      throw new errors.OperationError("Illegal operation type: " + this.type);
+    }
+  };
 
   this.clone = function() {
     return new TextOperation(this);
@@ -66,21 +79,6 @@ TextOperation.Prototype = function() {
 
   this.getLength = function() {
     return this.str.length;
-  };
-
-  this.apply = function(str) {
-    if (this.isEmpty()) return str;
-    var adapter = (str instanceof TextOperation.StringAdapter) ? str : new TextOperation.StringAdapter(str);
-    if (this.type === INS) {
-      adapter.insert(this.pos, this.str);
-    }
-    else if (this.type === DEL) {
-      adapter.delete(this.pos, this.str.length);
-    }
-    else {
-      throw new Error("Illegal operation type: " + this.type);
-    }
-    return adapter.get();
   };
 
   this.invert = function() {
@@ -228,57 +226,18 @@ var transform = function(a, b, options) {
   return [a, b];
 };
 
-var __apply__ = function(op, array) {
-  if (Substance.isArray(op)) {
-    op = new TextOperation(op);
-  }
-  else if (!(op instanceof TextOperation)) {
-    op = TextOperation.fromJSON(op);
-  }
-  return op.apply(array);
-};
-
 TextOperation.transform = function() {
   return transform.apply(null, arguments);
 };
 
-TextOperation.apply = __apply__;
-
-var StringAdapter = function(str) {
-  this.str = str;
-};
-StringAdapter.prototype = {
-  insert: function(pos, str) {
-    if (this.str.length < pos) {
-      throw new Error("Provided string is too short.");
-    }
-    if (this.str.splice) {
-      this.str.splice(pos, 0, str);
-    } else {
-      this.str = this.str.slice(0, pos).concat(str).concat(this.str.slice(pos));
-    }
-  },
-  delete: function(pos, length) {
-    if (this.str.length < pos + length) {
-      throw new Error("Provided string is too short.");
-    }
-    if (this.str.splice) {
-      this.str.splice(pos, length);
-    } else {
-      this.str = this.str.slice(0, pos).concat(this.str.slice(pos + length));
-    }
-  },
-  get: function() {
-    return this.str;
-  }
-};
+/* Factories */
 
 TextOperation.Insert = function(pos, str) {
-  return new TextOperation(["+", pos, str]);
+  return new TextOperation({ type: INS, pos: pos, str: str });
 };
 
 TextOperation.Delete = function(pos, str) {
-  return new TextOperation(["-", pos, str]);
+  return new TextOperation({ type: DEL, pos: pos, str: str });
 };
 
 // A helper class to model Text selections and to provide an easy way
@@ -376,7 +335,6 @@ Range.fromJSON = function(data) {
   return new Range(data);
 };
 
-TextOperation.StringAdapter = StringAdapter;
 TextOperation.Range = Range;
 TextOperation.INSERT = INS;
 TextOperation.DELETE = DEL;

@@ -10,10 +10,10 @@ var TextOperation = operator.TextOperation;
 function testTransform(a, b, input, expected) {
   var t = ObjectOperation.transform(a, b);
 
-  var output = ObjectOperation.apply(t[1], ObjectOperation.apply(a, Substance.clone(input)));
+  var output = t[1].apply(a.apply(Substance.clone(input)));
   assert.isDeepEqual(expected, output);
 
-  output = ObjectOperation.apply(t[0], ObjectOperation.apply(b, Substance.clone(input)));
+  output = t[0].apply(b.apply(Substance.clone(input)));
   assert.isDeepEqual(expected, output);
 }
 
@@ -32,18 +32,6 @@ ObjectOperationTest.Prototype = function() {
       var op = ObjectOperation.Create(path, val);
 
       var obj = {};
-      op.apply(obj);
-
-      assert.isDeepEqual(expected, obj);
-    },
-
-    "Apply: create (nested)", function() {
-      var path = ["a", "b"];
-      var val = "bla";
-      var expected = {a: { b: "bla"} };
-      var op = ObjectOperation.Create(path, val);
-
-      var obj = {"a": {}};
       op.apply(obj);
 
       assert.isDeepEqual(expected, obj);

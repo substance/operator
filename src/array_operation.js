@@ -45,27 +45,35 @@ ArrayOperation.fromJSON = function(data) {
 
 ArrayOperation.Prototype = function() {
 
-  this.clone = function() {
-    return new ArrayOperation(this);
-  };
-
   this.apply = function(array) {
     if (this.type === NOP) {
       return array;
     }
-    var adapter = (array instanceof ArrayOperation.ArrayAdapter) ? array : new ArrayOperation.ArrayAdapter(array);
-    // Insert
     if (this.type === INS) {
-      adapter.insert(this.pos, this.val);
+      if (array.length < this.pos) {
+        throw new Error("Provided array is too small.");
+      }
+      array.splice(this.pos, 0, this.val);
+      return array;
     }
     // Delete
     else if (this.type === DEL) {
-      adapter.delete(this.pos, this.val);
+      if (array.length < this.pos) {
+        throw new Error("Provided array is too small.");
+      }
+      if (!Substance.isEqual(array[this.pos], this.val)) {
+        throw Error("Unexpected value at position " + this.pos + ". Expected " + this.val + ", found " + array[this.pos]);
+      }
+      array.splice(this.pos, 1);
+      return array;
     }
     else {
       throw new Error("Illegal state.");
     }
-    return array;
+  };
+
+  this.clone = function() {
+    return new ArrayOperation(this);
   };
 
   this.invert = function() {
@@ -247,21 +255,10 @@ transform0 = function(a, b, options) {
   return [a, b];
 };
 
-var __apply__ = function(op, array) {
-  if (Substance.isArray(op)) {
-    op = new ArrayOperation(op);
-  } else if (!(op instanceof ArrayOperation)) {
-    op = ArrayOperation.fromJSON(op);
-  }
-  return op.apply(array);
-};
-
 ArrayOperation.transform = transform0;
 ArrayOperation.hasConflict = hasConflict;
 
-ArrayOperation.perform = __apply__;
-// DEPRECATED: use ArrayOperation.perform
-ArrayOperation.apply = __apply__;
+/* Factories */
 
 ArrayOperation.Insert = function(pos, val) {
   return new ArrayOperation({type:INS, pos: pos, val: val});
@@ -270,58 +267,6 @@ ArrayOperation.Insert = function(pos, val) {
 ArrayOperation.Delete = function(pos, val) {
   return new ArrayOperation({ type:DEL, pos: pos, val: val });
 };
-
-ArrayOperation.create = function(array, spec) {
-  var type = spec[0];
-  var val, pos;
-  if (type === INS || type === "+") {
-    pos = spec[1];
-    val = spec[2];
-    return ArrayOperation.Insert(pos, val);
-  } else if (type === DEL || type === "-") {
-    pos = spec[1];
-    val = array[pos];
-    return ArrayOperation.Delete(pos, val);
-  } else {
-    throw new Error("Illegal specification.");
-  }
-};
-
-var ArrayAdapter = function(arr) {
-  this.array = arr;
-};
-
-ArrayAdapter.prototype = {
-  insert: function(pos, val) {
-    if (this.array.length < pos) {
-      throw new Error("Provided array is too small.");
-    }
-    this.array.splice(pos, 0, val);
-  },
-
-  delete: function(pos, val) {
-    if (this.array.length < pos) {
-      throw new Error("Provided array is too small.");
-    }
-    if (this.array[pos] !== val) {
-      throw new Error("Unexpected value at position " + pos + ". Expected " + val + ", found " + this.array[pos]);
-    }
-    this.array.splice(pos, 1);
-  },
-
-  move: function(val, pos, to) {
-    if (this.array.length < pos) {
-      throw new Error("Provided array is too small.");
-    }
-    this.array.splice(pos, 1);
-
-    if (this.array.length < to) {
-      throw new Error("Provided array is too small.");
-    }
-    this.array.splice(to, 0, val);
-  }
-};
-ArrayOperation.ArrayAdapter = ArrayAdapter;
 
 ArrayOperation.NOP = NOP;
 ArrayOperation.DELETE = DEL;

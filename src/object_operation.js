@@ -1,8 +1,11 @@
 "use strict";
 
 var Substance = require('substance');
+var PathAdapter = Substance.PathAdapter;
+
 var TextOperation = require('./text_operation');
 var ArrayOperation = require('./array_operation');
+
 var Conflict = require('./conflict');
 
 var NOP = "NOP";
@@ -12,14 +15,12 @@ var UPDATE = 'update';
 var SET = 'set';
 
 var ObjectOperation = function(data) {
-
   this.type = data.type;
   this.path = data.path;
 
   if (this.type === CREATE || this.type === DELETE) {
     this.val = data.val;
   }
-
   // Updates can be given as value or as Operation (Text, Array)
   else if (this.type === UPDATE) {
     if (data.diff !== undefined) {
@@ -29,12 +30,10 @@ var ObjectOperation = function(data) {
       throw new Error("Illegal argument: update by value or by diff must be provided");
     }
   }
-
   else if (this.type === SET) {
     this.val = data.val;
     this.original = data.original;
   }
-
   this.data = data.data;
 };
 
@@ -57,6 +56,52 @@ ObjectOperation.fromJSON = function(data) {
 
 ObjectOperation.Prototype = function() {
 
+  this.apply = function(obj) {
+    if (this.type === NOP) return obj;
+    var adapter;
+    if (obj instanceof PathAdapter) {
+      adapter = obj;
+    } else {
+      adapter = new PathAdapter(obj);
+    }
+    if (this.type === CREATE) {
+      adapter.set(this.path, Substance.clone(this.val));
+      return obj;
+    }
+    if (this.type === DELETE) {
+      adapter.delete(this.path, "strict");
+    }
+    else if (this.type === UPDATE) {
+      var diff = this.diff;
+      var oldVal = adapter.get(this.path);
+      var newVal;
+      if (this.propertyType === 'array') {
+        if (! (diff instanceof ArrayOperation) ) {
+          diff = ArrayOperation.fromJSON(diff);
+        }
+        newVal = diff.apply(oldVal);
+      }
+      else if (this.propertyType === 'string') {
+        if (! (diff instanceof TextOperation) ) {
+          diff = TextOperation.fromJSON(diff);
+        }
+        newVal = diff.apply(oldVal);
+      }
+      else {
+        throw new Error("Unsupported type for operational update.");
+      }
+      adapter.set(this.path, newVal);
+    }
+    else if (this.type === SET) {
+      // clone here as the operations value must not be changed
+      adapter.set(this.path, Substance.clone(this.val));
+    }
+    else {
+      throw new Error("Illegal state.");
+    }
+    return obj;
+  };
+
   this.clone = function() {
     return new ObjectOperation(this);
   };
@@ -64,59 +109,6 @@ ObjectOperation.Prototype = function() {
   this.isNOP = function() {
     if (this.type === NOP) return true;
     else if (this.type === UPDATE) return this.diff.isNOP();
-  };
-
-  this.apply = function(obj) {
-    if (this.type === NOP) return obj;
-
-    // Note: this allows to use a custom adapter implementation
-    // to support other object like backends
-    var adapter = (obj instanceof ObjectOperation.Object) ? obj : new ObjectOperation.Object(obj);
-
-    if (this.type === CREATE) {
-      // clone here as the operations value must not be changed
-      adapter.create(this.path, Substance.clone(this.val));
-      return obj;
-    }
-
-    var val = adapter.get(this.path);
-
-    if (this.type === DELETE) {
-      // TODO: maybe we could tolerate such deletes
-      if (val === undefined) {
-        throw new Error("Property " + JSON.stringify(this.path) + " not found.");
-      }
-      adapter.delete(this.path, val);
-    }
-
-    else if (this.type === UPDATE) {
-      if (this.propertyType === 'object') {
-        val = ObjectOperation.apply(this.diff, val);
-        if(!adapter.inplace()) adapter.update(this.path, val, this.diff);
-      }
-      else if (this.propertyType === 'array') {
-        val = ArrayOperation.apply(this.diff, val);
-        if(!adapter.inplace()) adapter.update(this.path, val, this.diff);
-      }
-      else if (this.propertyType === 'string') {
-        val = TextOperation.apply(this.diff, val);
-        adapter.update(this.path, val, this.diff);
-      }
-      else {
-        throw new Error("Unsupported type for operational update.");
-      }
-    }
-
-    else if (this.type === SET) {
-      // clone here as the operations value must not be changed
-      adapter.set(this.path, Substance.clone(this.val));
-    }
-
-    else {
-      throw new Error("Illegal state.");
-    }
-
-    return obj;
   };
 
   this.invert = function() {
@@ -181,7 +173,13 @@ ObjectOperation.Prototype = function() {
 
     else if (this.type === UPDATE) {
       data.diff = this.diff;
-      data.propertyType = this.propertyType;
+      if (this.diff instanceof ObjectOperation) {
+        data.propertyType = "object";
+      } else if (this.diff instanceof ArrayOperation) {
+        data.propertyType = "array";
+      } else if (this.diff instanceof TextOperation) {
+        data.propertyType = "string";
+      }
     }
 
     else if (this.type === SET) {
@@ -196,64 +194,7 @@ ObjectOperation.Prototype = function() {
 
 Substance.initClass(ObjectOperation);
 
-ObjectOperation.Object = function(obj) {
-  this.obj = obj;
-};
-
-ObjectOperation.Object.Prototype = function() {
-
-  function resolve(self, obj, path, create) {
-    var item = obj;
-    var idx = 0;
-    for (; idx < path.length-1; idx++) {
-      if (item === undefined) {
-        throw new Error("Key error: could not find element for path " + JSON.stringify(self.path));
-      }
-
-      if (item[path[idx]] === undefined && create) {
-        item[path[idx]] = {};
-      }
-
-      item = item[path[idx]];
-    }
-    return {parent: item, key: path[idx]};
-  }
-
-  this.get = function(path) {
-    var item = resolve(this, this.obj, path);
-    return item.parent[item.key];
-  };
-
-  this.create = function(path, value) {
-    var item = resolve(this, this.obj, path, true);
-    if (item.parent[item.key] !== undefined) {
-      throw new Error("Value already exists. path =" + JSON.stringify(path));
-    }
-    item.parent[item.key] = value;
-  };
-
-  // Note: in the default implementation we do not need the diff
-  this.update = function(path, value) {
-    this.set(path, value);
-  };
-
-  this.set = function(path, value) {
-    var item = resolve(this, this.obj, path);
-    item.parent[item.key] = value;
-  };
-
-  this.delete = function(path) {
-    var item = resolve(this, this.obj, path);
-    delete item.parent[item.key];
-  };
-
-  this.inplace = function() {
-    return true;
-  };
-
-};
-ObjectOperation.Object.prototype = new ObjectOperation.Object.Prototype();
-
+/* Low level implementation */
 
 var hasConflict = function(a, b) {
   if (a.type === NOP || b.type === NOP) return false;
@@ -431,44 +372,50 @@ var transform = function(a, b, options) {
 ObjectOperation.transform = transform;
 ObjectOperation.hasConflict = hasConflict;
 
-var __apply__ = function(op, obj) {
-  if (!(op instanceof ObjectOperation)) {
-    op = ObjectOperation.fromJSON(op);
+/* Factories */
+
+ObjectOperation.Create = function(idOrPath, val) {
+  var path;
+  if (Substance.isString(idOrPath)) {
+    path = [idOrPath];
+  } else if (Substance.isArray(idOrPath)) {
+    path = idOrPath;
+  } else {
+    throw new Error('Illegal argument');
   }
-  return op.apply(obj);
-};
-
-// TODO: rename to "exec" or perform
-ObjectOperation.apply = __apply__;
-
-ObjectOperation.Create = function(path, val) {
   return new ObjectOperation({type: CREATE, path: path, val: val});
 };
 
-ObjectOperation.Delete = function(path, val) {
+ObjectOperation.Delete = function(idOrPath, val) {
+  var path;
+  if (Substance.isString(idOrPath)) {
+    path = [idOrPath];
+  } else if (Substance.isArray(idOrPath)) {
+    path = idOrPath;
+  } else {
+    throw new Error('Illegal argument');
+  }
   return new ObjectOperation({type: DELETE, path: path, val: val});
 };
 
-function guessPropertyType(op) {
-
+ObjectOperation.Update = function(path, op) {
+  var propertyType;
   if (op instanceof TextOperation) {
-    return "string";
+    propertyType = "string";
   }
   else if (op instanceof ArrayOperation) {
-    return  "array";
+    propertyType = "array";
+  }
+  else if (op instanceof ObjectOperation) {
+    propertyType = "object";
   }
   else {
-    return "other";
+    throw new Error('Unsupported type for operational changes');
   }
-}
-
-ObjectOperation.Update = function(path, diff, propertyType) {
-  propertyType = propertyType || guessPropertyType(diff);
-
   return new ObjectOperation({
     type: UPDATE,
     path: path,
-    diff: diff,
+    diff: op,
     propertyType: propertyType
   });
 };

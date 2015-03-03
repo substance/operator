@@ -18,7 +18,9 @@
   },
   "devDependencies": {
     "mocha": "1.21.x",
-    "substance-test": "git+https://github.com/substance/test.git#next"
+    "express": "4.9.x",
+    "substance-test": "git+https://github.com/substance/test.git#next",
+    "substance-cjs": "git+https://github.com/substance/cjs.git#next"
   },
   "scripts": {
     "test": "mocha -R spec tests/run.js"
