@@ -1,4 +1,4 @@
-Operator  [![Build Status](https://travis-ci.org/substance/operator.png)](https://travis-ci.org/substance/operator)
-========
+Substance Operator
+=====
 
-Operational Transformation for strings, arrays and objects.
+**No longer maintained. Use http://github.com/substance/substance instead.**
